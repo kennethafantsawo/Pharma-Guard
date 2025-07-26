@@ -10,8 +10,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Search, LoaderCircle, Pill, AlertTriangle, ShieldAlert, HeartPulse } from 'lucide-react';
+import { Search, LoaderCircle, Pill, AlertTriangle, ShieldAlert, HeartPulse, Frown } from 'lucide-react';
 import { medicationInfo, type MedicationInfoOutput } from '@/ai/flows/medication-info';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const SearchSchema = z.object({
   medicationName: z.string().min(2, 'Veuillez entrer un nom de médicament.'),
@@ -73,7 +74,7 @@ export default function MedicationInfoPage() {
             </div>
             <h1 className="text-4xl font-bold font-headline text-foreground mt-4">Informations Médicaments</h1>
             <p className="text-muted-foreground mt-2 text-lg">
-              Recherchez des informations détaillées sur un médicament.
+              Recherchez des informations détaillées sur un médicament, alignées sur la base de données Vidal.
             </p>
           </header>
 
@@ -96,21 +97,32 @@ export default function MedicationInfoPage() {
           </form>
 
           {isPending && (
-             <div className="space-y-4">
-                <Card><CardHeader><CardTitle><LoaderCircle className="animate-spin text-accent" /></CardTitle></CardHeader><CardContent>Recherche en cours...</CardContent></Card>
+             <div className="flex items-center justify-center gap-3 text-lg text-muted-foreground">
+                <LoaderCircle className="animate-spin text-accent h-6 w-6" />
+                <span>Recherche en cours...</span>
              </div>
           )}
           
           {error && <p className="text-destructive text-center">{error}</p>}
 
           {result && (
-            <div className="space-y-6 animate-in fade-in-50 duration-500">
-                <h2 className="text-3xl font-bold text-center font-headline">{result.name}</h2>
-                <InfoCard icon={<Pill />} title="Description" content={result.description} />
-                <InfoCard icon={<HeartPulse />} title="Posologie" content={result.dosage} />
-                <InfoCard icon={<AlertTriangle />} title="Effets secondaires" content={result.sideEffects} />
-                <InfoCard icon={<ShieldAlert />} title="Contre-indications" content={result.contraindications} />
-            </div>
+            result.found ? (
+                <div className="space-y-6 animate-in fade-in-50 duration-500">
+                    <h2 className="text-3xl font-bold text-center font-headline">{result.name}</h2>
+                    <InfoCard icon={<Pill />} title="Description" content={result.description} />
+                    <InfoCard icon={<HeartPulse />} title="Posologie" content={result.dosage} />
+                    <InfoCard icon={<AlertTriangle />} title="Effets secondaires" content={result.sideEffects} />
+                    <InfoCard icon={<ShieldAlert />} title="Contre-indications" content={result.contraindications} />
+                </div>
+            ) : (
+                <Alert variant="destructive">
+                    <Frown className="h-4 w-4" />
+                    <AlertTitle>Médicament non trouvé</AlertTitle>
+                    <AlertDescription>
+                        Impossible de trouver des informations pour le terme que vous avez recherché. Veuillez vérifier l'orthographe ou essayer le nom de la molécule.
+                    </AlertDescription>
+                </Alert>
+            )
           )}
 
         </div>
@@ -118,4 +130,3 @@ export default function MedicationInfoPage() {
     </PageWrapper>
   );
 }
-
