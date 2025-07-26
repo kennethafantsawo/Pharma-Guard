@@ -1,0 +1,14 @@
+diff --git a/node_modules/dotprompt/dist/index.js b/node_modules/dotprompt/dist/index.js
+index f9d21b7..4f5a34e 100644
+--- a/node_modules/dotprompt/dist/index.js
++++ b/node_modules/dotprompt/dist/index.js
+@@ -100,8 +100,7 @@
+         const extension = path.extname(filepath);
+         if (!extension) {
+             throw new Error(`File ${filepath} has no extension.`);
+-        }
+-        if (!require.extensions[extension]) {
++        } else if (!require.extensions[extension]) {
+             // We only support .js and .ts files.
+             // Let's add support for them by default.
+             // This is a bit of a hack, but it's the best we can do.
