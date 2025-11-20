@@ -58,7 +58,7 @@ export function RecentSearches({ user }: RecentSearchesProps) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
-        <AlertTitle>Erreur</pre>
+        <AlertTitle>Erreur</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
     );
