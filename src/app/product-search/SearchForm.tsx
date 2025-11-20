@@ -22,6 +22,7 @@ type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface SearchFormProps {
   user: Profile;
+  onNewSearch: () => void;
 }
 
 const MAX_IMAGES = 3;
@@ -37,7 +38,7 @@ const SearchSchema = z.object({
 
 type SearchValues = z.infer<typeof SearchSchema>;
 
-export function SearchForm({ user }: SearchFormProps) {
+export function SearchForm({ user, onNewSearch }: SearchFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -117,6 +118,8 @@ export function SearchForm({ user }: SearchFormProps) {
         toast({ title: 'Demande envoyée !', description: 'Les pharmacies à proximité seront notifiées.' });
         form.reset({ productName: ''});
         setImagePreviews([]);
+        form.setValue('images', undefined);
+        onNewSearch(); // Notify parent to refresh list
       } else {
         toast({ title: 'Erreur', description: result.error, variant: 'destructive' });
       }

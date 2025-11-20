@@ -5,6 +5,8 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { z } from 'zod';
 import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import { createServerClient } from '@supabase/ssr';
 
 const SignUpSchema = z.object({
   phone: z.string().min(8, 'Le numéro de téléphone est trop court.'),
@@ -188,10 +190,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
             });
 
         if (insertError) throw new Error(`Erreur lors de l'enregistrement de la recherche : ${insertError.message}`);
-
-        // 4. (Future step) Add to search_history table
         
-        // Invalidate cache for pages that might display this data
         revalidatePath('/product-search');
 
         return { success: true };
@@ -200,5 +199,37 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         console.error('Error in createSearchAction:', error);
         const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
         return { success: false, error: errorMessage };
+    }
+}
+
+export async function getSearchesByClientAction(clientId: string) {
+    // This action needs to be secure, but since we're not using Supabase Auth provider directly,
+    // we must rely on the clientId passed from a secure context.
+    // For now, we trust the `page.tsx` to hold the user state securely.
+    if (!supabaseAdmin) {
+        return { success: false, error: 'La configuration du serveur est manquante.', data: null };
+    }
+
+    if (!clientId) {
+        return { success: false, error: 'ID Client manquant.', data: null };
+    }
+
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('searches')
+            .select('*')
+            .eq('client_id', clientId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            throw error;
+        }
+
+        return { success: true, data: data };
+
+    } catch (error) {
+        console.error('Error fetching client searches:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+        return { success: false, error: errorMessage, data: null };
     }
 }

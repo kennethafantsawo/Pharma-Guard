@@ -7,16 +7,24 @@ import { Search } from 'lucide-react';
 import { AuthForm } from './AuthForm';
 import { SearchForm } from './SearchForm';
 import type { Database } from '@/lib/supabase/client';
+import { RecentSearches } from './RecentSearches';
+import { Separator } from '@/components/ui/separator';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export default function ProductSearchPage() {
   const [user, setUser] = useState<Profile | null>(null);
+  const [lastSearchTimestamp, setLastSearchTimestamp] = useState(Date.now());
 
   const handleLoginSuccess = (loggedInUser: Profile) => {
     setUser(loggedInUser);
   };
   
+  const handleNewSearch = () => {
+    // This will trigger a re-fetch in RecentSearches
+    setLastSearchTimestamp(Date.now());
+  };
+
   return (
     <PageWrapper>
       <div className="container mx-auto px-4 md:px-6 py-8 animate-in fade-in duration-500">
@@ -32,7 +40,11 @@ export default function ProductSearchPage() {
           </header>
 
           {user ? (
-            <SearchForm user={user} />
+            <div className="space-y-12">
+              <SearchForm user={user} onNewSearch={handleNewSearch} />
+              <Separator />
+              <RecentSearches user={user} key={lastSearchTimestamp} />
+            </div>
           ) : (
             <AuthForm onLoginSuccess={handleLoginSuccess} />
           )}
