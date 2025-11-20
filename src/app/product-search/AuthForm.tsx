@@ -89,9 +89,9 @@ export function AuthForm({ onLoginSuccess }: { onLoginSuccess: (user: Profile) =
     if (!supabase) return;
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.href, // Redirect back to this page
-      },
+      // By removing `redirectTo`, Supabase will use the default redirect URI
+      // configured in the Supabase dashboard under Authentication > URL Configuration.
+      // This is often more reliable than using window.location.href.
     });
     if (error) {
       toast({ title: 'Erreur Google', description: error.message, variant: 'destructive' });
@@ -188,3 +188,5 @@ export function AuthForm({ onLoginSuccess }: { onLoginSuccess: (user: Profile) =
     </Card>
   );
 }
+
+    
