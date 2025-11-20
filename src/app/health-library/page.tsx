@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -28,9 +28,10 @@ export default function HealthLibraryPage() {
   };
 
   // Generate initial tips on component mount
-  useState(() => {
+  useEffect(() => {
     handleGenerateTips();
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageWrapper>
