@@ -3,6 +3,8 @@
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { z } from 'zod';
+import { processDemand } from '@/ai/flows/process-demand';
+import { revalidatePath } from 'next/cache';
 
 const SignUpSchema = z.object({
   phone: z.string().min(8, 'Le numéro de téléphone est trop court.'),
@@ -121,24 +123,82 @@ export async function signInWithPhoneAction(formData: FormData) {
 }
 
 const CreateSearchSchema = z.object({
-    clientId: z.string().uuid(),
+    clientId: z.string().uuid('ID client invalide'),
     productName: z.string().optional(),
-    // We will handle images separately
+    images: z.array(z.instanceof(File)).optional(),
 });
 
 export async function createSearchAction(formData: FormData): Promise<{success: boolean, error?: string}> {
-    // This is a placeholder action. In the future, this will:
-    // 1. Validate inputs.
-    // 2. Upload images to Supabase Storage.
-    // 3. Call an AI flow to process the demand.
-    // 4. Save the search to the 'searches' table.
-    
-    const data = Object.fromEntries(formData.entries());
-    console.log("Received search data:", data);
+    if (!supabaseAdmin) {
+        return { success: false, error: 'La configuration du serveur est manquante.' };
+    }
 
-    // Simulate a delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const rawData = {
+        clientId: formData.get('clientId'),
+        productName: formData.get('productName') || undefined,
+        images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
+    };
 
-    // For now, just return success.
-    return { success: true };
+    const validatedFields = CreateSearchSchema.safeParse(rawData);
+
+    if (!validatedFields.success) {
+        console.error("Validation error:", validatedFields.error.flatten().fieldErrors);
+        return { success: false, error: 'Données de recherche invalides.' };
+    }
+
+    const { clientId, productName, images } = validatedFields.data;
+    const imageUrls: string[] = [];
+
+    try {
+        // 1. Upload images to Supabase Storage
+        if (images && images.length > 0) {
+            for (const image of images) {
+                const fileName = `${clientId}/${Date.now()}-${image.name}`;
+                const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+                    .from('demands')
+                    .upload(fileName, image, {
+                        cacheControl: '3600',
+                        upsert: false,
+                    });
+
+                if (uploadError) throw new Error(`Erreur de téléversement d'image : ${uploadError.message}`);
+                
+                const { data: urlData } = supabaseAdmin.storage
+                    .from('demands')
+                    .getPublicUrl(uploadData.path);
+                
+                imageUrls.push(urlData.publicUrl);
+            }
+        }
+
+        // 2. Call AI flow to process demand
+        const { productName: processedName } = await processDemand({
+            description: productName || '',
+            photoDataUris: imageUrls,
+        });
+
+        // 3. Save the search to the 'searches' table
+        const { error: insertError } = await supabaseAdmin
+            .from('searches')
+            .insert({
+                client_id: clientId,
+                original_product_name: productName,
+                product_name: processedName,
+                photo_urls: imageUrls.length > 0 ? imageUrls : null,
+            });
+
+        if (insertError) throw new Error(`Erreur lors de l'enregistrement de la recherche : ${insertError.message}`);
+
+        // 4. (Future step) Add to search_history table
+        
+        // Invalidate cache for pages that might display this data
+        revalidatePath('/product-search');
+
+        return { success: true };
+
+    } catch (error) {
+        console.error('Error in createSearchAction:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
+        return { success: false, error: errorMessage };
+    }
 }
