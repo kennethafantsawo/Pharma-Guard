@@ -4,3 +4,4 @@ config();
 
 import '@/ai/flows/pharmacy-chatbot.ts';
 import '@/ai/flows/medication-info.ts';
+import '@/app/health-library/actions.ts';

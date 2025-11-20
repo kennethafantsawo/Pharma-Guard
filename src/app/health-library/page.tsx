@@ -1,73 +1,105 @@
 
-import { supabase } from '@/lib/supabase/client';
+'use client';
+
+import { useState, useTransition } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BookOpen, AlertCircle } from 'lucide-react';
-import { type HealthPost } from '@/lib/types';
-import { HealthPostCard } from './HealthPostCard';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BookOpen, AlertCircle, RefreshCw, LoaderCircle, Sparkles } from 'lucide-react';
+import { generateHealthTips, type HealthTip } from './actions';
 
-async function getHealthPosts(): Promise<{ posts: HealthPost[] | null; error: string | null }> {
-  if (!supabase) {
-    return { posts: null, error: "Configuration Supabase manquante. Veuillez ajouter NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY à votre fichier .env." };
-  }
-  const { data, error } = await supabase
-    .from('health_posts')
-    .select('*')
-    // Ne récupérer que les fiches publiées (date de publication passée ou nulle)
-    .or('publish_at.is.null,publish_at.lte.now()')
-    .order('created_at', { ascending: false });
+export default function HealthLibraryPage() {
+  const [tips, setTips] = useState<HealthTip[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
 
-  if (error) {
-    console.error("Error fetching health posts:", error.message);
-    let userMessage = "Impossible de charger les fiches santé. La table 'health_posts' existe-t-elle bien avec toutes ses colonnes ?";
-    if (error.message.includes('column "likes" does not exist')) {
-        userMessage = "La colonne 'likes' est manquante dans la base de données. Veuillez exécuter le script SQL pour l'ajouter et réactualiser la page.";
-    } else if (error.message.includes('column "publish_at" does not exist')) {
-        userMessage = "La colonne 'publish_at' est manquante dans la base de données. Veuillez exécuter le script SQL pour l'ajouter et réactualiser la page.";
-    }
-    return { posts: null, error: userMessage };
-  }
-  return { posts: data, error: null };
-}
+  const handleGenerateTips = () => {
+    startTransition(async () => {
+      setError(null);
+      const result = await generateHealthTips();
+      if (result.success && result.tips) {
+        setTips(result.tips);
+      } else {
+        setError(result.error || "Une erreur est survenue lors de la génération des conseils.");
+        setTips([]);
+      }
+    });
+  };
 
-
-export default async function HealthLibraryPage() {
-  const { posts, error } = await getHealthPosts();
+  // Generate initial tips on component mount
+  useState(() => {
+    handleGenerateTips();
+  });
 
   return (
     <PageWrapper>
       <div className="container mx-auto px-4 md:px-6 py-8 animate-in fade-in duration-500">
-        <div className="max-w-2xl mx-auto">
-          <header className="mb-8">
-            <h1 className="text-2xl font-bold font-headline text-foreground">Accueil Fiches Santé</h1>
-            <p className="text-muted-foreground mt-1">
-              Conseils et actualités santé de nos experts.
+        <div className="max-w-3xl mx-auto">
+          <header className="mb-6 text-center">
+             <div className="inline-block p-4 bg-primary/10 rounded-xl mb-4">
+              <BookOpen className="h-10 w-10 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold font-headline text-foreground">Conseils Santé du Jour</h1>
+            <p className="text-muted-foreground mt-2 text-lg">
+              Découvrez des conseils santé générés par notre IA pour vous aider à rester en forme.
             </p>
           </header>
 
+          <div className="mb-8 flex justify-center">
+            <Button onClick={handleGenerateTips} disabled={isPending} size="lg">
+              {isPending ? (
+                <LoaderCircle className="h-5 w-5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-5 w-5" />
+              )}
+              <span>{isPending ? 'Génération...' : 'Nouveaux conseils'}</span>
+            </Button>
+          </div>
+
           {error && (
-            <Alert variant="destructive">
+            <Alert variant="destructive" className="mb-6">
               <AlertCircle className="h-4 w-4"/>
-              <AlertTitle>Erreur de chargement</AlertTitle>
+              <AlertTitle>Erreur de Génération</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
 
-          <div className="border border-b-0 rounded-t-xl overflow-hidden">
-            {posts && posts.length > 0 ? (
-              posts.map((post) => (
-                <HealthPostCard key={post.id} post={post} />
+          <div className="space-y-4">
+            {isPending && tips.length === 0 ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                        <CardHeader>
+                           <div className="h-6 w-3/4 bg-muted rounded-md" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="h-4 w-full bg-muted rounded-md mb-2" />
+                            <div className="h-4 w-5/6 bg-muted rounded-md" />
+                        </CardContent>
+                    </Card>
+                ))
+            ) : tips.length > 0 ? (
+              tips.map((tip, index) => (
+                <Card key={index} className="animate-in fade-in-50 duration-500">
+                  <CardHeader>
+                    <CardTitle className="flex items-start gap-3 text-primary font-headline text-xl">
+                      <Sparkles className="h-5 w-5 mt-1 flex-shrink-0" />
+                      <span>{tip.title}</span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-foreground/90 whitespace-pre-wrap">{tip.content}</p>
+                  </CardContent>
+                </Card>
               ))
-            ) : !error && (
-              <div className="p-4 border-b">
-                <Alert>
-                  <AlertCircle className="h-4 w-4"/>
-                  <AlertTitle>Aucune Fiche Santé</AlertTitle>
-                  <AlertDescription>
-                    Aucune fiche n'a été publiée pour le moment. Revenez bientôt !
-                  </AlertDescription>
-                </Alert>
-              </div>
+            ) : !isPending && (
+              <Alert>
+                <AlertCircle className="h-4 w-4"/>
+                <AlertTitle>Aucun conseil disponible</AlertTitle>
+                <AlertDescription>
+                  Cliquez sur le bouton ci-dessus pour générer de nouveaux conseils santé.
+                </AlertDescription>
+              </Alert>
             )}
           </div>
         </div>

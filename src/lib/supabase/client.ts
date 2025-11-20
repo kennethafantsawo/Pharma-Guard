@@ -1,5 +1,5 @@
+
 import { createClient } from '@supabase/supabase-js'
-import type { WeekSchedule } from '@/lib/types'
 
 // Add your Database type here. It's recommended to generate this with the Supabase CLI.
 // For now, we'll use a simple generic.
@@ -22,43 +22,6 @@ export type Database = {
           contact2: string
         }
       }
-      health_posts: {
-        Row: {
-          id: number;
-          created_at: string;
-          title: string;
-          content: string;
-          image_url: string | null;
-          likes: number;
-          publish_at: string | null;
-        },
-        Insert: {
-          title: string;
-          content: string;
-          image_url?: string | null;
-          likes?: number;
-          publish_at?: string | null;
-        },
-        Update: {
-          title?: string;
-          content?: string;
-          image_url?: string | null;
-          likes?: number;
-          publish_at?: string | null;
-        }
-      },
-      health_post_comments: {
-        Row: {
-          id: number;
-          post_id: number;
-          content: string;
-          created_at: string;
-        },
-        Insert: {
-          post_id: number;
-          content: string;
-        }
-      },
       user_feedback: {
         Row: {
           id: number;

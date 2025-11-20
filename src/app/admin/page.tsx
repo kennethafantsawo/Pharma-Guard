@@ -1,12 +1,10 @@
 
 'use client';
 
-import { useState, useTransition, type ChangeEvent, useEffect, useRef } from 'react';
+import { useState, useTransition, type ChangeEvent } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,79 +12,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast"
-import { Lock, Settings, LogOut, CheckCircle, AlertTriangle, LoaderCircle, Trash2, Newspaper, Upload, PlusCircle, Pencil, X, CalendarIcon, Clock } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import Image from 'next/image';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { Lock, Settings, LogOut, LoaderCircle, Upload } from 'lucide-react';
 
-
-import type { WeekSchedule, HealthPost } from '@/lib/types';
-import { createHealthPostAction, deleteHealthPostAction, updateHealthPostAction, updatePharmaciesAction } from './actions';
-import { supabase } from '@/lib/supabase/client';
+import type { WeekSchedule } from '@/lib/types';
+import { updatePharmaciesAction } from './actions';
 
 const LoginSchema = z.object({
   password: z.string().min(1, 'Le mot de passe est requis.'),
 });
 type LoginValues = z.infer<typeof LoginSchema>;
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-
-const HealthPostSchema = z.object({
-  title: z.string().min(3, 'Le titre est requis.'),
-  content: z.string().min(10, 'Le contenu est requis.'),
-  image: z
-    .custom<FileList>()
-    .optional()
-    .refine((files) => !files || files.length === 0 || files[0].size <= MAX_FILE_SIZE, `La taille maximale de l'image est de 5Mo.`)
-    .refine((files) => !files || files.length === 0 || ACCEPTED_IMAGE_TYPES.includes(files[0].type), "Seuls les formats .jpg, .jpeg, .png et .webp sont acceptés."),
-  publish_at: z.date().optional(),
-});
-type HealthPostValues = z.infer<typeof HealthPostSchema>;
-
 // Admin Panel Component
 const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: string }) => {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
-  const [posts, setPosts] = useState<HealthPost[]>([]);
-  const [isLoadingPosts, setIsLoadingPosts] = useState(true);
-  const [editingPost, setEditingPost] = useState<HealthPost | null>(null);
-
-  const createForm = useForm<HealthPostValues>({ resolver: zodResolver(HealthPostSchema) });
-  const editForm = useForm<HealthPostValues>({ resolver: zodResolver(HealthPostSchema) });
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      if (!supabase) return;
-      setIsLoadingPosts(true);
-      // Fetch all posts, even scheduled ones, for the admin view
-      const { data, error } = await supabase.from('health_posts').select('*').order('created_at', { ascending: false });
-      if (data) setPosts(data);
-      if (error) toast({ title: "Erreur", description: "Impossible de charger les fiches santé.", variant: "destructive" });
-      setIsLoadingPosts(false);
-    };
-    fetchPosts();
-  }, [toast]);
-  
-  useEffect(() => {
-    if (editingPost) {
-        editForm.reset({
-            title: editingPost.title,
-            content: editingPost.content,
-            publish_at: editingPost.publish_at ? new Date(editingPost.publish_at) : undefined,
-        });
-    }
-  }, [editingPost, editForm]);
-
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    // Logic for updating pharmacies JSON
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -119,103 +60,6 @@ const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: st
     event.target.value = ''; // Reset input
   };
   
-  const onCreatePostSubmit: SubmitHandler<HealthPostValues> = (data) => {
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('content', data.content);
-    if (data.image && data.image.length > 0) {
-      formData.append('image', data.image[0]);
-    }
-    if (data.publish_at) {
-        formData.append('publish_at', data.publish_at.toISOString());
-    }
-
-    startTransition(async () => {
-      const result = await createHealthPostAction(password, formData);
-      if (result.success && result.newPost) {
-        toast({ title: "Succès", description: result.message });
-        setPosts(prev => [result.newPost!, ...prev]);
-        createForm.reset();
-        // Also reset file input visually
-        const fileInput = document.getElementById('image') as HTMLInputElement;
-        if(fileInput) fileInput.value = '';
-
-      } else {
-        toast({ title: "Erreur", description: result.message, variant: "destructive" });
-      }
-    });
-  };
-
-  const onEditPostSubmit: SubmitHandler<HealthPostValues> = (data) => {
-    if (!editingPost) return;
-
-    const formData = new FormData();
-    formData.append('title', data.title);
-    formData.append('content', data.content);
-    if (data.image && data.image.length > 0) {
-      formData.append('image', data.image[0]);
-    }
-
-    if (data.publish_at) {
-      formData.append('publish_at', data.publish_at.toISOString());
-    } else {
-      // Send empty string to clear the date in the backend
-      formData.append('publish_at', '');
-    }
-
-    startTransition(async () => {
-      const result = await updateHealthPostAction(password, editingPost.id, formData);
-      if (result.success && result.updatedPost) {
-        toast({ title: "Succès", description: result.message });
-        setPosts(prev => prev.map(p => p.id === editingPost.id ? result.updatedPost! : p));
-        setEditingPost(null);
-      } else {
-        toast({ title: "Erreur", description: result.message, variant: "destructive" });
-      }
-    });
-  }
-
-  const handleDeletePost = (postId: number) => {
-    startTransition(async () => {
-      const result = await deleteHealthPostAction(password, postId);
-      if (result.success) {
-        toast({ title: "Succès", description: result.message });
-        setPosts(prev => prev.filter(p => p.id !== postId));
-      } else {
-        toast({ title: "Erreur", description: result.message, variant: "destructive" });
-      }
-    });
-  };
-
-  const DatePickerField = ({ form, fieldName }: { form: any, fieldName: "publish_at" }) => (
-    <div>
-        <Label htmlFor={fieldName}>Date de publication (Optionnel)</Label>
-        <Popover>
-            <PopoverTrigger asChild>
-                <Button
-                    variant={"outline"}
-                    className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !form.watch(fieldName) && "text-muted-foreground"
-                    )}
-                >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {form.watch(fieldName) ? format(form.watch(fieldName), "PPP 'à' HH:mm", { locale: fr }) : <span>Choisir une date</span>}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-                <Calendar
-                    mode="single"
-                    selected={form.watch(fieldName)}
-                    onSelect={(date) => form.setValue(fieldName, date, { shouldValidate: true })}
-                    initialFocus
-                />
-            </PopoverContent>
-        </Popover>
-        {form.formState.errors[fieldName] && <p className="text-destructive text-sm mt-1">{form.formState.errors[fieldName].message}</p>}
-    </div>
-  );
-
   return (
     <Card className="w-full">
       <CardHeader>
@@ -223,147 +67,23 @@ const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: st
           <span className="flex items-center gap-2"><Settings/>Panneau d'Administration</span>
           <Button variant="ghost" size="sm" onClick={onLogout}><LogOut className="mr-2 h-4 w-4"/>Se déconnecter</Button>
         </CardTitle>
+         <CardDescription>
+            Gérez les données de l'application.
+          </CardDescription>
       </CardHeader>
       <CardContent>
-        <Tabs defaultValue="pharmacies">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="pharmacies"><Upload className="mr-2" />Pharmacies</TabsTrigger>
-            <TabsTrigger value="health-posts"><Newspaper className="mr-2" />Fiches Santé</TabsTrigger>
-          </TabsList>
-          <TabsContent value="pharmacies" className="mt-4">
-            <CardDescription className="mb-4">
+         <div className="space-y-4">
+            <h3 className="font-semibold flex items-center gap-2"><Upload />Mise à jour des pharmacies</h3>
+            <p className="text-sm text-muted-foreground">
               Remplacez les données des pharmacies de garde en chargeant un nouveau fichier JSON.
-            </CardDescription>
+            </p>
             <div className="space-y-2">
               <Label htmlFor="pharmacy-file">Nouveau fichier pharmacies.json</Label>
               <Input id="pharmacy-file" type="file" accept=".json" onChange={handleFileChange} disabled={isPending} />
               {isPending && <p className="text-sm text-muted-foreground flex items-center gap-2"><LoaderCircle className="animate-spin h-4 w-4" /> Mise à jour en cours...</p>}
             </div>
-          </TabsContent>
-          <TabsContent value="health-posts" className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="font-semibold mb-2 flex items-center gap-2"><PlusCircle />Créer une Fiche Santé</h3>
-                <form onSubmit={createForm.handleSubmit(onCreatePostSubmit)} className="space-y-4">
-                  <div>
-                    <Label htmlFor="title">Titre</Label>
-                    <Input id="title" {...createForm.register('title')} disabled={isPending} />
-                    {createForm.formState.errors.title && <p className="text-destructive text-sm mt-1">{createForm.formState.errors.title.message}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="content">Contenu</Label>
-                    <Textarea id="content" {...createForm.register('content')} disabled={isPending} rows={5} />
-                    {createForm.formState.errors.content && <p className="text-destructive text-sm mt-1">{createForm.formState.errors.content.message}</p>}
-                  </div>
-                  <div>
-                    <Label htmlFor="image">Image (Optionnel, 5Mo max)</Label>
-                    <Input id="image" type="file" accept="image/*" {...createForm.register('image')} disabled={isPending}/>
-                    {createForm.formState.errors.image && <p className="text-destructive text-sm mt-1">{createForm.formState.errors.image.message}</p>}
-                  </div>
-                   <DatePickerField form={createForm} fieldName="publish_at" />
-                  <Button type="submit" disabled={isPending} className="w-full">
-                    {isPending ? <LoaderCircle className="animate-spin" /> : 'Publier la fiche'}
-                  </Button>
-                </form>
-              </div>
-              <div>
-                <h3 className="font-semibold mb-2">Fiches Existantes</h3>
-                <ScrollArea className="h-96 rounded-md border p-4">
-                  {isLoadingPosts ? <p>Chargement...</p> : 
-                    posts.length > 0 ? (
-                      <div className="space-y-4">
-                        {posts.map(post => {
-                          const isScheduled = post.publish_at && new Date(post.publish_at) > new Date();
-                          return (
-                            <Card key={post.id} className="flex items-center justify-between p-3">
-                              <div className="flex items-center gap-3">
-                                  {post.image_url ? 
-                                    <Image src={post.image_url} alt={post.title} width={40} height={40} className="rounded-md object-cover" /> 
-                                    : <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center"><Newspaper className="h-5 w-5 text-muted-foreground"/></div>
-                                  }
-                                  <div>
-                                     <p className="font-semibold">{post.title}</p>
-                                     <div className="text-xs text-muted-foreground">
-                                        {isScheduled ? (
-                                            <span className="flex items-center gap-1 text-amber-600">
-                                                <Clock className="h-3 w-3" />
-                                                Programmé: {format(new Date(post.publish_at!), 'dd/MM/yy', { locale: fr })}
-                                            </span>
-                                        ) : (
-                                            <span>Publié: {new Date(post.created_at).toLocaleDateString()}</span>
-                                        )}
-                                     </div>
-                                  </div>
-                              </div>
-                              <div className="flex gap-2">
-                                  <Button variant="outline" size="icon" onClick={() => setEditingPost(post)} disabled={isPending}>
-                                      <Pencil className="h-4 w-4" />
-                                  </Button>
-                                  <AlertDialog>
-                                      <AlertDialogTrigger asChild>
-                                          <Button variant="destructive" size="icon" disabled={isPending}><Trash2 className="h-4 w-4" /></Button>
-                                      </AlertDialogTrigger>
-                                      <AlertDialogContent>
-                                          <AlertDialogHeader>
-                                              <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                                              <AlertDialogDescription>Cette action est irréversible. La fiche santé "{post.title}" sera définitivement supprimée.</AlertDialogDescription>
-                                          </AlertDialogHeader>
-                                          <AlertDialogFooter>
-                                              <AlertDialogCancel>Annuler</AlertDialogCancel>
-                                              <AlertDialogAction onClick={() => handleDeletePost(post.id)}>Supprimer</AlertDialogAction>
-                                          </AlertDialogFooter>
-                                      </AlertDialogContent>
-                                  </AlertDialog>
-                              </div>
-                            </Card>
-                          )
-                        })}
-                      </div>
-                    ) : (
-                      <p className="text-muted-foreground text-sm">Aucune fiche santé trouvée.</p>
-                    )
-                  }
-                </ScrollArea>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </div>
       </CardContent>
-
-      <Dialog open={!!editingPost} onOpenChange={(isOpen) => !isOpen && setEditingPost(null)}>
-        <DialogContent>
-            <DialogHeader>
-                <DialogTitle>Modifier la fiche santé</DialogTitle>
-                <DialogDescription>
-                    Modifiez les détails de la fiche "{editingPost?.title}". Laissez le champ image vide pour conserver l'actuelle.
-                </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={editForm.handleSubmit(onEditPostSubmit)} className="space-y-4">
-                <div>
-                    <Label htmlFor="edit-title">Titre</Label>
-                    <Input id="edit-title" {...editForm.register('title')} disabled={isPending} />
-                    {editForm.formState.errors.title && <p className="text-destructive text-sm mt-1">{editForm.formState.errors.title.message}</p>}
-                </div>
-                <div>
-                    <Label htmlFor="edit-content">Contenu</Label>
-                    <Textarea id="edit-content" {...editForm.register('content')} disabled={isPending} rows={5} />
-                    {editForm.formState.errors.content && <p className="text-destructive text-sm mt-1">{editForm.formState.errors.content.message}</p>}
-                </div>
-                <div>
-                    <Label htmlFor="edit-image">Nouvelle Image (Optionnel)</Label>
-                    <Input id="edit-image" type="file" accept="image/*" {...editForm.register('image')} disabled={isPending}/>
-                    {editForm.formState.errors.image && <p className="text-destructive text-sm mt-1">{editForm.formState.errors.image.message}</p>}
-                </div>
-                <DatePickerField form={editForm} fieldName="publish_at" />
-                <DialogFooter>
-                    <DialogClose asChild><Button type="button" variant="outline">Annuler</Button></DialogClose>
-                    <Button type="submit" disabled={isPending}>
-                        {isPending ? <LoaderCircle className="animate-spin" /> : 'Mettre à jour'}
-                    </Button>
-                </DialogFooter>
-            </form>
-        </DialogContent>
-      </Dialog>
     </Card>
   );
 };
