@@ -6,12 +6,30 @@ import { z } from 'zod';
 import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/client';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 const SignUpSchema = z.object({
   phone: z.string().min(8, 'Le numéro de téléphone est trop court.'),
   username: z.string().min(2, 'Le nom d\'utilisateur est requis.'),
   role: z.literal('Client'), // Only client signup is handled here now
 });
+
+export async function getUserProfile(): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
+    const supabase = createSupabaseServerClient();
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+        return null;
+    }
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+    
+    return profile;
+}
 
 export async function signUpWithPhoneAction(formData: FormData) {
   if (!supabaseAdmin) {
@@ -38,17 +56,22 @@ export async function signUpWithPhoneAction(formData: FormData) {
         return { success: false, error: 'Ce numéro de téléphone est déjà utilisé.' };
     }
 
-    const { error: profileError } = await supabaseAdmin
+    // For phone-based sign-up, we don't create an auth user, just a profile.
+    // This is a simplified approach. A more robust solution might involve OTP.
+    const { data: newUser, error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
             phone: phone,
             username: username,
             role: role,
-        });
+        })
+        .select()
+        .single();
+
 
     if (profileError) throw profileError;
 
-    return { success: true, message: 'Inscription réussie !' };
+    return { success: true, message: 'Inscription réussie !', user: newUser };
 
   } catch(error) {
     console.error('Sign up error:', error);
@@ -96,7 +119,7 @@ export async function signInWithPhoneAction(formData: FormData) {
 }
 
 const CreateSearchSchema = z.object({
-    clientId: z.string().uuid('ID client invalide'),
+    clientId: z.string(), // Phone users might not have a UUID, so we adapt.
     productName: z.string().optional(),
     images: z.array(z.instanceof(File)).optional(),
 });
@@ -111,8 +134,12 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         productName: formData.get('productName') || undefined,
         images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
     };
-
-    const validatedFields = CreateSearchSchema.safeParse(rawData);
+    
+    // We can't use UUID validation here as phone-based users won't have one
+    const validatedFields = CreateSearchSchema.safeParse({
+        ...rawData,
+        clientId: rawData.clientId as string
+    });
 
     if (!validatedFields.success) {
         console.error("Validation error:", validatedFields.error.flatten().fieldErrors);
@@ -125,7 +152,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     try {
         if (images && images.length > 0) {
             for (const image of images) {
-                const fileName = `${clientId}/${Date.now()}-${image.name}`;
+                const fileName = `${clientId.replace(/[^a-zA-Z0-9]/g, '_')}/${Date.now()}-${image.name}`;
                 const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
                     .from('demands')
                     .upload(fileName, image, {

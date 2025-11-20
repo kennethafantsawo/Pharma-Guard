@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Search, LogOut, LoaderCircle } from 'lucide-react';
 import { AuthForm } from './AuthForm';
@@ -12,61 +12,26 @@ import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
+import { getUserProfile } from './actions';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export default function ProductSearchPage() {
   const [user, setUser] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isLoggingOut, startLogoutTransition] = useTransition();
   const [lastSearchTimestamp, setLastSearchTimestamp] = useState(Date.now());
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchUser = async () => {
-      if (!supabase) {
-        setLoading(false);
-        return;
-      };
-      
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', session.user.id)
-          .single();
-        setUser(profile || null);
-      }
+    const checkUser = async () => {
+      setLoading(true);
+      const userProfile = await getUserProfile();
+      setUser(userProfile);
       setLoading(false);
     };
 
-    fetchUser();
-
-    if (!supabase) return;
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (session) {
-           const fetchProfile = async () => {
-             const { data: profile } = await supabase!
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
-              setUser(profile || null);
-           }
-           fetchProfile();
-        } else {
-          setUser(null);
-        }
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    checkUser();
   }, []);
 
   const handleLoginSuccess = (loggedInUser: Profile) => {
@@ -78,14 +43,16 @@ export default function ProductSearchPage() {
   };
 
   const handleLogout = async () => {
-    if (!supabase) return;
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast({ title: 'Erreur', description: 'Impossible de se déconnecter.', variant: 'destructive' });
-    } else {
-      setUser(null);
-      toast({ title: 'Déconnecté', description: 'Vous avez été déconnecté avec succès.' });
-    }
+    startLogoutTransition(async () => {
+      if (!supabase) return;
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast({ title: 'Erreur', description: 'Impossible de se déconnecter.', variant: 'destructive' });
+      } else {
+        setUser(null);
+        toast({ title: 'Déconnecté', description: 'Vous avez été déconnecté avec succès.' });
+      }
+    });
   };
 
   return (
@@ -110,8 +77,8 @@ export default function ProductSearchPage() {
             <div className="space-y-12">
                <div className="text-center space-y-2">
                 <p>Connecté en tant que <span className="font-bold text-accent">{user.username}</span> ({user.role})</p>
-                <Button variant="ghost" size="sm" onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4"/>
+                <Button variant="ghost" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
+                  {isLoggingOut ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <LogOut className="mr-2 h-4 w-4"/>}
                   Se déconnecter
                 </Button>
               </div>
