@@ -26,17 +26,28 @@ export default function ProductSearchPage() {
   useEffect(() => {
     const checkUser = async () => {
       setLoading(true);
-      const userProfile = await getUserProfile();
+      const { data: userProfile } = await getUserProfile();
       setUser(userProfile);
       setLoading(false);
     };
 
     checkUser();
-  }, []);
 
-  const handleLoginSuccess = (loggedInUser: Profile) => {
-    setUser(loggedInUser);
-  };
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          checkUser();
+        } else if (event === 'SIGNED_OUT') {
+          setUser(null);
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
   
   const handleNewSearch = () => {
     setLastSearchTimestamp(Date.now());
@@ -44,7 +55,6 @@ export default function ProductSearchPage() {
 
   const handleLogout = async () => {
     startLogoutTransition(async () => {
-      if (!supabase) return;
       const { error } = await supabase.auth.signOut();
       if (error) {
         toast({ title: 'Erreur', description: 'Impossible de se déconnecter.', variant: 'destructive' });
@@ -76,7 +86,7 @@ export default function ProductSearchPage() {
           ) : user ? (
             <div className="space-y-12">
                <div className="text-center space-y-2">
-                <p>Connecté en tant que <span className="font-bold text-accent">{user.username}</span> ({user.role})</p>
+                <p>Connecté en tant que <span className="font-bold text-accent">{user.username}</span></p>
                 <Button variant="ghost" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
                   {isLoggingOut ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <LogOut className="mr-2 h-4 w-4"/>}
                   Se déconnecter
@@ -87,7 +97,7 @@ export default function ProductSearchPage() {
               <RecentSearches user={user} key={lastSearchTimestamp} />
             </div>
           ) : (
-            <AuthForm onLoginSuccess={handleLoginSuccess} />
+            <AuthForm />
           )}
 
         </div>

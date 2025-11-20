@@ -23,12 +23,11 @@ export function AuthForm() {
   const { toast } = useToast();
 
   const handleGoogleSignIn = async () => {
-    if (!supabase) return;
     startTransition(async () => {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: `${window.location.origin}/auth/callback`,
+            redirectTo: `${window.location.origin}/auth/callback?next=/product-search`,
           },
         });
         if (error) {
@@ -54,5 +53,3 @@ export function AuthForm() {
     </Card>
   );
 }
-
-    

@@ -8,12 +8,12 @@ import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/client';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-export async function getUserProfile(): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
+export async function getUserProfile(): Promise<{data: Database['public']['Tables']['profiles']['Row'] | null}> {
     const supabase = createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
 
     if (!session) {
-        return null;
+        return { data: null };
     }
 
     const { data: profile } = await supabase
@@ -22,7 +22,7 @@ export async function getUserProfile(): Promise<Database['public']['Tables']['pr
         .eq('id', session.user.id)
         .single();
     
-    return profile;
+    return { data: profile };
 }
 
 const CreateSearchSchema = z.object({
@@ -131,5 +131,3 @@ export async function getSearchesByClientAction(clientId: string) {
         return { success: false, error: errorMessage, data: null };
     }
 }
-
-    
