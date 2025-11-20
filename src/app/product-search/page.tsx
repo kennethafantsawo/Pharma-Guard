@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Search } from 'lucide-react';
 import { AuthForm } from './AuthForm';
@@ -9,12 +9,49 @@ import { SearchForm } from './SearchForm';
 import type { Database } from '@/lib/supabase/client';
 import { RecentSearches } from './RecentSearches';
 import { Separator } from '@/components/ui/separator';
+import { supabase } from '@/lib/supabase/client';
+import { getProfileFromSession } from './actions';
+import { useToast } from '@/hooks/use-toast';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export default function ProductSearchPage() {
   const [user, setUser] = useState<Profile | null>(null);
   const [lastSearchTimestamp, setLastSearchTimestamp] = useState(Date.now());
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session) {
+          const result = await getProfileFromSession();
+          if (result.success && result.user) {
+            setUser(result.user);
+            toast({ title: 'Connexion réussie', description: `Bienvenue, ${result.user.username} !` });
+          } else if (result.error) {
+            toast({ title: 'Erreur de profil', description: result.error, variant: 'destructive' });
+          }
+        }
+      }
+    );
+
+    // Initial check in case user is already logged in
+    const checkInitialSession = async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+            const result = await getProfileFromSession();
+            if (result.success && result.user) {
+                setUser(result.user);
+            }
+        }
+    }
+    checkInitialSession();
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [toast]);
+
 
   const handleLoginSuccess = (loggedInUser: Profile) => {
     setUser(loggedInUser);

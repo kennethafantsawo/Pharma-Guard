@@ -7,20 +7,12 @@ import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { createServerClient } from '@supabase/ssr';
+import type { Database } from '@/lib/supabase/client';
 
 const SignUpSchema = z.object({
   phone: z.string().min(8, 'Le numéro de téléphone est trop court.'),
   username: z.string().min(2, 'Le nom d\'utilisateur est requis.'),
-  role: z.enum(['Client', 'Pharmacien']),
-  pharmacyName: z.string().optional(),
-}).refine(data => {
-    if (data.role === 'Pharmacien') {
-        return !!data.pharmacyName && data.pharmacyName.length > 0;
-    }
-    return true;
-}, {
-    message: 'Le nom de la pharmacie est requis pour un pharmacien.',
-    path: ['pharmacyName'],
+  role: z.literal('Client'), // Only client signup is handled here now
 });
 
 export async function signUpWithPhoneAction(formData: FormData) {
@@ -35,11 +27,10 @@ export async function signUpWithPhoneAction(formData: FormData) {
     return { success: false, error: 'Données invalides.', issues: validatedFields.error.issues };
   }
   
-  const { phone, username, role, pharmacyName } = validatedFields.data;
+  const { phone, username, role } = validatedFields.data;
 
   try {
-     // 1. Check if user already exists
-    const { data: existingUser, error: existingUserError } = await supabaseAdmin
+    const { data: existingUser } = await supabaseAdmin
         .from('profiles')
         .select('id')
         .eq('phone', phone)
@@ -49,31 +40,15 @@ export async function signUpWithPhoneAction(formData: FormData) {
         return { success: false, error: 'Ce numéro de téléphone est déjà utilisé.' };
     }
 
-    // 2. Create user in auth.users
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.createUser({
-        phone: phone,
-        phone_confirm: true, // Auto-confirm for simplicity for now
-    });
-    
-    if (authError) throw authError;
-    if (!authUser.user) throw new Error('La création de l\'utilisateur a échoué.');
-
-    // 3. Create profile in public.profiles
     const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .insert({
-            id: authUser.user.id,
             phone: phone,
             username: username,
             role: role,
-            pharmacyName: role === 'Pharmacien' ? pharmacyName : null
         });
 
-    if (profileError) {
-        // If profile creation fails, we should delete the auth user to avoid orphans
-        await supabaseAdmin.auth.admin.deleteUser(authUser.user.id);
-        throw profileError;
-    }
+    if (profileError) throw profileError;
 
     return { success: true, message: 'Inscription réussie !' };
 
@@ -114,8 +89,6 @@ export async function signInWithPhoneAction(formData: FormData) {
             return { success: false, error: 'Aucun utilisateur trouvé avec ce numéro de téléphone.' };
         }
         
-        // For now, we are not using OTP, so we just return the user profile data.
-        // This is a simplified login for now. Real implementation would involve OTP.
         return { success: true, user: profile };
 
     } catch (error) {
@@ -123,6 +96,44 @@ export async function signInWithPhoneAction(formData: FormData) {
         return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
     }
 }
+
+export async function getProfileFromSession(): Promise<{ success: boolean; user?: Database['public']['Tables']['profiles']['Row']; error?: string; }> {
+  const cookieStore = cookies();
+  const supabase = createServerClient<Database>(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+          cookies: {
+              get(name: string) {
+                  return cookieStore.get(name)?.value;
+              },
+          },
+      }
+  );
+
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+  if (sessionError) {
+      return { success: false, error: 'Erreur de session.' };
+  }
+
+  if (!session) {
+      return { success: false, error: 'Non authentifié.' };
+  }
+
+  const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+  if (profileError || !profile) {
+      return { success: false, error: 'Profil non trouvé.' };
+  }
+
+  return { success: true, user: profile };
+}
+
 
 const CreateSearchSchema = z.object({
     clientId: z.string().uuid('ID client invalide'),
@@ -152,7 +163,6 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     const imageUrls: string[] = [];
 
     try {
-        // 1. Upload images to Supabase Storage
         if (images && images.length > 0) {
             for (const image of images) {
                 const fileName = `${clientId}/${Date.now()}-${image.name}`;
@@ -173,13 +183,11 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
             }
         }
 
-        // 2. Call AI flow to process demand
         const { productName: processedName } = await processDemand({
             description: productName || '',
             photoDataUris: imageUrls,
         });
 
-        // 3. Save the search to the 'searches' table
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
@@ -203,9 +211,6 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
 }
 
 export async function getSearchesByClientAction(clientId: string) {
-    // This action needs to be secure, but since we're not using Supabase Auth provider directly,
-    // we must rely on the clientId passed from a secure context.
-    // For now, we trust the `page.tsx` to hold the user state securely.
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.', data: null };
     }

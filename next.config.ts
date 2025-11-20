@@ -17,7 +17,13 @@ const remotePatterns = [
     protocol: 'https',
     hostname: 'pooariitfzfacjafwkkp.supabase.co',
     port: '',
-    pathname: '/storage/v1/object/public/health-posts-images/**',
+    pathname: '/storage/v1/object/public/**',
+  },
+   {
+    protocol: 'https',
+    hostname: 'lh3.googleusercontent.com',
+    port: '',
+    pathname: '/**',
   },
 ];
 
@@ -30,7 +36,7 @@ if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
           protocol: 'https',
           hostname: supabaseHostname,
           port: '',
-          pathname: '/storage/v1/object/public/health-posts-images/**',
+          pathname: '/storage/v1/object/public/**',
         });
     }
   } catch (error) {
