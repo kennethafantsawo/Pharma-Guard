@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
 const navLinks = [
-  { href: '/', label: 'Pharmacies', icon: Pill },
+  { href: '/pharmacies', label: 'Pharmacies', icon: Pill },
   { href: '/product-search', label: 'Chercher Produit', icon: Search },
   { href: '/health-library', label: 'Bibliothèque Santé', icon: BookOpen },
   { href: '/feedback', label: 'Avis', icon: Star },

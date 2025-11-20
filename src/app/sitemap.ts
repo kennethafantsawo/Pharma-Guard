@@ -6,6 +6,7 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://pharma-proget.vercel
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     '/',
+    '/pharmacies',
     '/product-search',
     '/health-library',
     '/feedback',
