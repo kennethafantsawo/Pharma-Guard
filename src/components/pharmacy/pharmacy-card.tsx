@@ -29,7 +29,7 @@ const WhatsAppIcon = () => (
 
 export function PharmacyCard({ pharmacy }: PharmacyCardProps) {
   const whatsAppNumber = pharmacy.contact2.startsWith('+') ? pharmacy.contact2.substring(1) : pharmacy.contact2;
-  const mapQuery = encodeURIComponent(`${pharmacy.nom}, ${pharmacy.localisation}`);
+  const mapQuery = encodeURIComponent(`pharmacie ${pharmacy.nom}`);
   const mapUrl = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
 
   return (
