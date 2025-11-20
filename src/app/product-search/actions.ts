@@ -8,12 +8,6 @@ import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/client';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-const SignUpSchema = z.object({
-  phone: z.string().min(8, 'Le numéro de téléphone est trop court.'),
-  username: z.string().min(2, 'Le nom d\'utilisateur est requis.'),
-  role: z.literal('Client'), // Only client signup is handled here now
-});
-
 export async function getUserProfile(): Promise<Database['public']['Tables']['profiles']['Row'] | null> {
     const supabase = createSupabaseServerClient();
     const { data: { session } } = await supabase.auth.getSession();
@@ -31,95 +25,8 @@ export async function getUserProfile(): Promise<Database['public']['Tables']['pr
     return profile;
 }
 
-export async function signUpWithPhoneAction(formData: FormData) {
-  if (!supabaseAdmin) {
-    return { success: false, error: 'La configuration du serveur est manquante.' };
-  }
-
-  const data = Object.fromEntries(formData.entries());
-  const validatedFields = SignUpSchema.safeParse(data);
-
-  if (!validatedFields.success) {
-    return { success: false, error: 'Données invalides.', issues: validatedFields.error.issues };
-  }
-  
-  const { phone, username, role } = validatedFields.data;
-
-  try {
-    const { data: existingUser } = await supabaseAdmin
-        .from('profiles')
-        .select('id')
-        .eq('phone', phone)
-        .single();
-    
-    if (existingUser) {
-        return { success: false, error: 'Ce numéro de téléphone est déjà utilisé.' };
-    }
-
-    // For phone-based sign-up, we don't create an auth user, just a profile.
-    // This is a simplified approach. A more robust solution might involve OTP.
-    const { data: newUser, error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .insert({
-            phone: phone,
-            username: username,
-            role: role,
-        })
-        .select()
-        .single();
-
-
-    if (profileError) throw profileError;
-
-    return { success: true, message: 'Inscription réussie !', user: newUser };
-
-  } catch(error) {
-    console.error('Sign up error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
-    return { success: false, error: errorMessage };
-  }
-}
-
-
-const SignInSchema = z.object({
-  phone: z.string().min(8, 'Le numéro de téléphone est requis.'),
-});
-
-export async function signInWithPhoneAction(formData: FormData) {
-    if (!supabaseAdmin) {
-        return { success: false, error: 'La configuration du serveur est manquante.' };
-    }
-
-    const data = Object.fromEntries(formData.entries());
-    const validatedFields = SignInSchema.safeParse(data);
-
-    if (!validatedFields.success) {
-        return { success: false, error: 'Numéro de téléphone invalide.' };
-    }
-
-    const { phone } = validatedFields.data;
-
-    try {
-        const { data: profile, error } = await supabaseAdmin
-            .from('profiles')
-            .select('*')
-            .eq('phone', phone)
-            .single();
-
-        if (error || !profile) {
-            return { success: false, error: 'Aucun utilisateur trouvé avec ce numéro de téléphone.' };
-        }
-        
-        return { success: true, user: profile };
-
-    } catch (error) {
-        console.error('Sign in error:', error);
-        return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
-    }
-}
-
 const CreateSearchSchema = z.object({
-    clientId: z.string(), // Phone users might not have a UUID, so we adapt.
+    clientId: z.string().uuid(),
     productName: z.string().optional(),
     images: z.array(z.instanceof(File)).optional(),
 });
@@ -135,7 +42,6 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
     };
     
-    // We can't use UUID validation here as phone-based users won't have one
     const validatedFields = CreateSearchSchema.safeParse({
         ...rawData,
         clientId: rawData.clientId as string
@@ -152,7 +58,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     try {
         if (images && images.length > 0) {
             for (const image of images) {
-                const fileName = `${clientId.replace(/[^a-zA-Z0-9]/g, '_')}/${Date.now()}-${image.name}`;
+                const fileName = `${clientId}/${Date.now()}-${image.name}`;
                 const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
                     .from('demands')
                     .upload(fileName, image, {
@@ -225,3 +131,5 @@ export async function getSearchesByClientAction(clientId: string) {
         return { success: false, error: errorMessage, data: null };
     }
 }
+
+    

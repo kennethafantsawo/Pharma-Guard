@@ -151,7 +151,7 @@ export type Database = {
           created_at: string
           id: string
           pharmacy_name: string | null
-          phone: string
+          phone: string | null
           role: Database["public"]["Enums"]["user_role"]
           username: string
         }
@@ -159,7 +159,7 @@ export type Database = {
           created_at?: string
           id: string
           pharmacy_name?: string | null
-          phone: string
+          phone?: string | null
           role: Database["public"]["Enums"]["user_role"]
           username: string
         }
@@ -167,7 +167,7 @@ export type Database = {
           created_at?: string
           id?: string
           pharmacy_name?: string | null
-          phone?: string
+          phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           username?: string
         }
@@ -396,3 +396,5 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    
