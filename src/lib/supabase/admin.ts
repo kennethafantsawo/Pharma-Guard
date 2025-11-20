@@ -1,4 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { Database } from './database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -12,7 +12,19 @@ export const supabaseAdmin =
                 autoRefreshToken: false,
                 persistSession: false,
             },
-             cookies: {},
+            // The admin client is a server-side client that uses a service role key.
+            // It doesn't need to manage user sessions, so we provide dummy cookie functions.
+             cookies: {
+                get(name: string) {
+                    return undefined;
+                },
+                set(name: string, value: string, options: CookieOptions) {
+                    // Do nothing
+                },
+                remove(name: string, options: CookieOptions) {
+                    // Do nothing
+                },
+             },
         })
         : null;
 
