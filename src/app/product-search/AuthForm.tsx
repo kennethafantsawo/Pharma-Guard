@@ -87,11 +87,10 @@ export function AuthForm({ onLoginSuccess }: { onLoginSuccess: (user: Profile) =
 
   const handlePharmacistGoogleSignIn = async () => {
     if (!supabase) return;
-    console.log('Redirecting to:', window.location.href);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.href,
+        redirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     if (error) {
@@ -189,5 +188,3 @@ export function AuthForm({ onLoginSuccess }: { onLoginSuccess: (user: Profile) =
     </Card>
   );
 }
-
-    

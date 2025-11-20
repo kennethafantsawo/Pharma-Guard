@@ -5,8 +5,6 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { z } from 'zod';
 import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
-import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
 import type { Database } from '@/lib/supabase/client';
 
 const SignUpSchema = z.object({
@@ -96,44 +94,6 @@ export async function signInWithPhoneAction(formData: FormData) {
         return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
     }
 }
-
-export async function getProfileFromSession(): Promise<{ success: boolean; user?: Database['public']['Tables']['profiles']['Row']; error?: string; }> {
-  const cookieStore = cookies();
-  const supabase = createServerClient<Database>(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-          cookies: {
-              get(name: string) {
-                  return cookieStore.get(name)?.value;
-              },
-          },
-      }
-  );
-
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-  if (sessionError) {
-      return { success: false, error: 'Erreur de session.' };
-  }
-
-  if (!session) {
-      return { success: false, error: 'Non authentifié.' };
-  }
-
-  const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .single();
-
-  if (profileError || !profile) {
-      return { success: false, error: 'Profil non trouvé.' };
-  }
-
-  return { success: true, user: profile };
-}
-
 
 const CreateSearchSchema = z.object({
     clientId: z.string().uuid('ID client invalide'),
