@@ -1,3 +1,4 @@
+
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -117,4 +118,27 @@ export async function signInWithPhoneAction(formData: FormData) {
         console.error('Sign in error:', error);
         return { success: false, error: 'Une erreur est survenue lors de la connexion.' };
     }
+}
+
+const CreateSearchSchema = z.object({
+    clientId: z.string().uuid(),
+    productName: z.string().optional(),
+    // We will handle images separately
+});
+
+export async function createSearchAction(formData: FormData): Promise<{success: boolean, error?: string}> {
+    // This is a placeholder action. In the future, this will:
+    // 1. Validate inputs.
+    // 2. Upload images to Supabase Storage.
+    // 3. Call an AI flow to process the demand.
+    // 4. Save the search to the 'searches' table.
+    
+    const data = Object.fromEntries(formData.entries());
+    console.log("Received search data:", data);
+
+    // Simulate a delay
+    await new Promise(resolve => setTimeout(resolve, 1500));
+
+    // For now, just return success.
+    return { success: true };
 }

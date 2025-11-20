@@ -50,6 +50,52 @@ export type Database = {
           role: 'Client' | 'Pharmacien';
           pharmacyName?: string | null;
         }
+      },
+      searches: {
+        Row: {
+          id: number;
+          client_id: string;
+          original_product_name: string | null;
+          product_name: string;
+          photo_urls: string[] | null;
+          created_at: string;
+        },
+        Insert: {
+          client_id: string;
+          original_product_name?: string | null;
+          product_name: string;
+          photo_urls?: string[] | null;
+        }
+      },
+      responses: {
+        Row: {
+          id: number;
+          search_id: number;
+          pharmacist_id: string;
+          pharmacy_name: string;
+          price: string | null;
+          created_at: string;
+        },
+        Insert: {
+          search_id: number;
+          pharmacist_id: string;
+          pharmacy_name: string;
+          price?: string | null;
+        }
+      },
+      messages: {
+        Row: {
+          id: number;
+          search_id: number;
+          sender_id: string;
+          content: string;
+          created_at: string;
+        },
+        Insert: {
+          search_id: number;
+          sender_id: string;
+          content: string;
+        }
       }
     }
     Functions: {}

@@ -3,16 +3,12 @@
 
 import { useState } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import { AuthForm } from './AuthForm';
+import { SearchForm } from './SearchForm';
 import type { Database } from '@/lib/supabase/client';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-
-// This will be the main page for the "Pharma-Connect" feature.
-// It will first show a login/signup form.
-// Once authenticated, it will show the product search interface.
 
 export default function ProductSearchPage() {
   const [user, setUser] = useState<Profile | null>(null);
@@ -36,17 +32,7 @@ export default function ProductSearchPage() {
           </header>
 
           {user ? (
-            <Card>
-              <CardHeader>
-                <CardTitle>Bienvenue, {user.username} !</CardTitle>
-                <CardDescription>
-                  Vous êtes connecté en tant que {user.role}.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Interface de recherche de produit (à venir)...</p>
-              </CardContent>
-            </Card>
+            <SearchForm user={user} />
           ) : (
             <AuthForm onLoginSuccess={handleLoginSuccess} />
           )}
