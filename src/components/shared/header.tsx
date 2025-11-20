@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, FileText, Search } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
