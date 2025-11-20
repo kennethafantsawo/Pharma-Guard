@@ -1,5 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
-import type { Database } from './client'
+import { createServerClient } from '@supabase/ssr'
+import type { Database } from './database.types'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -7,11 +7,12 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 // Initialize admin client only if variables are set to prevent crashing the app.
 export const supabaseAdmin = 
     (supabaseUrl && supabaseServiceKey)
-        ? createClient<Database>(supabaseUrl, supabaseServiceKey, {
+        ? createServerClient<Database>(supabaseUrl, supabaseServiceKey, {
             auth: {
                 autoRefreshToken: false,
                 persistSession: false,
             },
+             cookies: {},
         })
         : null;
 
