@@ -23,7 +23,10 @@ export default function ProductSearchPage() {
 
   useEffect(() => {
     const fetchUser = async () => {
-      if (!supabase) return;
+      if (!supabase) {
+        setLoading(false);
+        return;
+      };
       
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -40,9 +43,11 @@ export default function ProductSearchPage() {
 
     fetchUser();
 
+    if (!supabase) return;
+
     const { data: authListener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (event === 'SIGNED_IN' && session) {
+        if (session) {
            const fetchProfile = async () => {
              const { data: profile } = await supabase!
                 .from('profiles')
@@ -52,9 +57,10 @@ export default function ProductSearchPage() {
               setUser(profile || null);
            }
            fetchProfile();
-        } else if (event === 'SIGNED_OUT') {
+        } else {
           setUser(null);
         }
+        setLoading(false);
       }
     );
 
