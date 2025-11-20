@@ -10,3 +10,21 @@ export interface WeekSchedule {
   semaine: string;
   pharmacies: Pharmacy[];
 }
+
+export interface HealthPost {
+  id: number;
+  created_at: string;
+  title: string;
+  content: string;
+  image_url: string | null;
+  likes: number;
+  published_at: string | null;
+  status: 'published' | 'draft' | 'scheduled';
+}
+
+export interface HealthPostComment {
+  id: number;
+  post_id: number;
+  content: string;
+  created_at: string;
+}
