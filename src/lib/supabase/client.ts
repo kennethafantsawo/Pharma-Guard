@@ -33,6 +33,23 @@ export type Database = {
           type: string;
           content: string;
         }
+      },
+      profiles: {
+        Row: {
+          id: string; // Corresponds to auth.users.id
+          phone: string;
+          username: string;
+          role: 'Client' | 'Pharmacien';
+          pharmacyName: string | null;
+          created_at: string;
+        },
+        Insert: {
+          id: string;
+          phone: string;
+          username: string;
+          role: 'Client' | 'Pharmacien';
+          pharmacyName?: string | null;
+        }
       }
     }
     Functions: {}
