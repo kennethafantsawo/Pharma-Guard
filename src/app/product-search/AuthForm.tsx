@@ -87,11 +87,12 @@ export function AuthForm({ onLoginSuccess }: { onLoginSuccess: (user: Profile) =
 
   const handlePharmacistGoogleSignIn = async () => {
     if (!supabase) return;
+    console.log('Redirecting to:', window.location.href);
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      // By removing `redirectTo`, Supabase will use the default redirect URI
-      // configured in the Supabase dashboard under Authentication > URL Configuration.
-      // This is often more reliable than using window.location.href.
+      options: {
+        redirectTo: window.location.href,
+      },
     });
     if (error) {
       toast({ title: 'Erreur Google', description: error.message, variant: 'destructive' });
