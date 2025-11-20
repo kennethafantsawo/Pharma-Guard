@@ -23,8 +23,8 @@ export default function HomePage() {
           </header>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Link href="/pharmacies" legacyBehavior passHref>
-              <Card className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group">
+            <Link href="/pharmacies" className="group">
+              <Card className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
                 <div>
                   <CardHeader>
                     <div className="flex items-center gap-4">
@@ -48,8 +48,8 @@ export default function HomePage() {
               </Card>
             </Link>
 
-            <Link href="/product-search" legacyBehavior passHref>
-              <Card className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer group">
+            <Link href="/product-search" className="group">
+              <Card className="h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer">
                  <div>
                     <CardHeader>
                       <div className="flex items-center gap-4">
