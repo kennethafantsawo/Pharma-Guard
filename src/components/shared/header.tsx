@@ -6,14 +6,14 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, FileText } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, FileText, Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
 const navLinks = [
   { href: '/', label: 'Pharmacies', icon: Pill },
-  { href: '/medication-info', label: 'Infos Médicaments', icon: FileText },
-  { href: '/health-library', label: 'Fiches Santé', icon: BookOpen },
+  { href: '/product-search', label: 'Chercher Produit', icon: Search },
+  { href: '/health-library', label: 'Bibliothèque Santé', icon: BookOpen },
   { href: '/feedback', label: 'Avis', icon: Star },
   { href: '/admin', label: 'Options', icon: Settings },
 ];
