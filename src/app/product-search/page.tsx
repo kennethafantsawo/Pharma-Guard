@@ -1,17 +1,26 @@
 
 'use client';
 
+import { useState } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search } from 'lucide-react';
+import { AuthForm } from './AuthForm';
+import type { Database } from '@/lib/supabase/client';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
 
 // This will be the main page for the "Pharma-Connect" feature.
 // It will first show a login/signup form.
 // Once authenticated, it will show the product search interface.
 
 export default function ProductSearchPage() {
-  const isAuthenticated = false; // This will be replaced with real auth state later
+  const [user, setUser] = useState<Profile | null>(null);
 
+  const handleLoginSuccess = (loggedInUser: Profile) => {
+    setUser(loggedInUser);
+  };
+  
   return (
     <PageWrapper>
       <div className="container mx-auto px-4 md:px-6 py-8 animate-in fade-in duration-500">
@@ -26,20 +35,20 @@ export default function ProductSearchPage() {
             </p>
           </header>
 
-          {isAuthenticated ? (
-            <p>Interface de recherche de produit (à venir)</p>
-          ) : (
+          {user ? (
             <Card>
-                <CardHeader>
-                    <CardTitle>Connexion Requise</CardTitle>
-                    <CardDescription>
-                        Pour rechercher un produit, vous devez vous connecter ou créer un compte.
-                    </CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <p>Formulaire de connexion/inscription (à venir)</p>
-                </CardContent>
+              <CardHeader>
+                <CardTitle>Bienvenue, {user.username} !</CardTitle>
+                <CardDescription>
+                  Vous êtes connecté en tant que {user.role}.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p>Interface de recherche de produit (à venir)...</p>
+              </CardContent>
             </Card>
+          ) : (
+            <AuthForm onLoginSuccess={handleLoginSuccess} />
           )}
 
         </div>
