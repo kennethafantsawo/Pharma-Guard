@@ -1,4 +1,3 @@
-
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { AdminPageClient } from './AdminPageClient';
 

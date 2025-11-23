@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, type ChangeEvent } from 'react';
@@ -11,9 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast"
-import { Lock, Settings, LogOut, LoaderCircle, Upload } from 'lucide-react';
+import { Lock, Settings, LogOut, LoaderCircle, Upload, Pencil, Trash2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import type { WeekSchedule } from '@/lib/types';
+import type { WeekSchedule, HealthPost } from '@/lib/types';
 import { updatePharmaciesAction } from './actions';
 
 const LoginSchema = z.object({
@@ -67,21 +67,32 @@ const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: st
           <Button variant="ghost" size="sm" onClick={onLogout}><LogOut className="mr-2 h-4 w-4"/>Se déconnecter</Button>
         </CardTitle>
          <CardDescription>
-            Gérez les données de l'application.
+            Gérez les données de l'application via les onglets ci-dessous.
           </CardDescription>
       </CardHeader>
       <CardContent>
-         <div className="space-y-4">
-            <h3 className="font-semibold flex items-center gap-2"><Upload />Mise à jour des pharmacies</h3>
-            <p className="text-sm text-muted-foreground">
-              Remplacez les données des pharmacies de garde en chargeant un nouveau fichier JSON.
-            </p>
-            <div className="space-y-2">
-              <Label htmlFor="pharmacy-file">Nouveau fichier pharmacies.json</Label>
-              <Input id="pharmacy-file" type="file" accept=".json" onChange={handleFileChange} disabled={isPending} />
-              {isPending && <p className="text-sm text-muted-foreground flex items-center gap-2"><LoaderCircle className="animate-spin h-4 w-4" /> Mise à jour en cours...</p>}
-            </div>
-          </div>
+          <Tabs defaultValue="pharmacies" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="pharmacies">Pharmacies</TabsTrigger>
+                <TabsTrigger value="health-posts">Fiches Santé</TabsTrigger>
+            </TabsList>
+            <TabsContent value="pharmacies" className="pt-6">
+                 <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2"><Upload />Mise à jour des pharmacies</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Remplacez les données des pharmacies de garde en chargeant un nouveau fichier JSON.
+                    </p>
+                    <div className="space-y-2">
+                      <Label htmlFor="pharmacy-file">Nouveau fichier pharmacies.json</Label>
+                      <Input id="pharmacy-file" type="file" accept=".json" onChange={handleFileChange} disabled={isPending} />
+                      {isPending && <p className="text-sm text-muted-foreground flex items-center gap-2"><LoaderCircle className="animate-spin h-4 w-4" /> Mise à jour en cours...</p>}
+                    </div>
+                  </div>
+            </TabsContent>
+            <TabsContent value="health-posts" className="pt-6">
+                <p className="text-sm text-center text-muted-foreground">La gestion des fiches santé sera bientôt disponible ici.</p>
+            </TabsContent>
+        </Tabs>
       </CardContent>
     </Card>
   );
@@ -94,7 +105,7 @@ const LoginForm = ({ onLogin }: { onLogin: (password: string) => void }) => {
     const { toast } = useToast();
 
     const onSubmit: SubmitHandler<LoginValues> = (data) => {
-        if (data.password === 'kenneth18') {
+        if (data.password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
             onLogin(data.password);
             toast({ title: "Connexion réussie", description: "Bienvenue dans le panneau d'administration." });
         } else {
@@ -134,6 +145,20 @@ export function AdminPageClient() {
     setPassword('');
     setIsLoggedIn(false);
   };
+
+  if (!process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
+    return (
+      <Card className="w-full bg-destructive/10 border-destructive">
+          <CardHeader>
+              <CardTitle>Erreur de Configuration</CardTitle>
+              <CardDescription>
+                  La variable d'environnement `NEXT_PUBLIC_ADMIN_PASSWORD` n'est pas définie.
+                  Veuillez l'ajouter à votre fichier `.env` pour pouvoir utiliser cette page.
+              </CardDescription>
+          </CardHeader>
+      </Card>
+    )
+  }
 
   return (
     <>
