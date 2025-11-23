@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -6,7 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, Search } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
@@ -56,6 +55,11 @@ export function Header() {
           <nav className="hidden items-center gap-1 md:flex">
             <NavLinks />
           </nav>
+           <Button asChild variant="outline" className="hidden md:flex">
+              <Link href="/pharmacist-auth">
+                <LogIn className="mr-2 h-4 w-4" /> Espace Pharmacien
+              </Link>
+            </Button>
           <ThemeToggle />
           <div className="md:hidden">
             <Sheet>
@@ -69,6 +73,13 @@ export function Header() {
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col gap-4 py-6">
                   <NavLinks inSheet />
+                   <div className="border-t pt-4">
+                     <Button asChild variant="outline" className="w-full justify-center">
+                        <Link href="/pharmacist-auth">
+                            <LogIn className="mr-2 h-4 w-4" /> Espace Pharmacien
+                        </Link>
+                     </Button>
+                   </div>
                 </div>
               </SheetContent>
             </Sheet>
