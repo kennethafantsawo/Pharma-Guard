@@ -30,10 +30,18 @@ export default function PharmacistDashboardPage() {
     const checkUser = async () => {
       setLoading(true);
       const { user, profile } = await getPharmacistProfile();
+      
       if (!user || !profile || profile.role !== 'Pharmacien') {
         router.push('/pharmacist-auth');
         return;
       }
+      
+      // NEW: Redirect to profile completion if pharmacy_name is missing
+      if (!profile.pharmacy_name) {
+        router.push('/pharmacist-profile');
+        return;
+      }
+
       setUser(user);
       setProfile(profile);
 
@@ -83,7 +91,7 @@ export default function PharmacistDashboardPage() {
             <h1 className="text-3xl font-bold font-headline text-foreground flex items-center gap-3">
               <LayoutDashboard/> Tableau de bord
             </h1>
-            <p className="text-muted-foreground mt-1">Bienvenue, {profile.username}. Voici les dernières demandes de produits.</p>
+            <p className="text-muted-foreground mt-1">Bienvenue, {profile.username} ({profile.pharmacy_name}). Voici les dernières demandes.</p>
           </div>
           <Button onClick={handleSignOut} variant="outline">
             <LogOut className="mr-2" /> Se déconnecter
