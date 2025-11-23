@@ -1,8 +1,19 @@
+
 import { NextResponse, type NextRequest } from 'next/server'
-import { createServerClient } from '@supabase/ssr'
+import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { Database } from '@/lib/supabase/database.types'
 
 export async function middleware(request: NextRequest) {
+  // Check if Supabase environment variables are set. If not, log a warning
+  // and bypass the middleware to prevent the application from crashing.
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn('Supabase URL or Anon Key is not set. Middleware will be bypassed.');
+    return NextResponse.next({ request });
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -10,14 +21,14 @@ export async function middleware(request: NextRequest) {
   })
 
   const supabase = createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         get(name: string) {
           return request.cookies.get(name)?.value
         },
-        set(name: string, value: string, options) {
+        set(name: string, value: string, options: CookieOptions) {
           request.cookies.set({
             name,
             value,
@@ -34,7 +45,7 @@ export async function middleware(request: NextRequest) {
             ...options,
           })
         },
-        remove(name: string, options) {
+        remove(name: string, options: CookieOptions) {
           request.cookies.set({
             name,
             value: '',
@@ -52,6 +63,9 @@ export async function middleware(request: NextRequest) {
           })
         },
       },
+       auth: {
+        storage: null,
+      }
     }
   )
 
