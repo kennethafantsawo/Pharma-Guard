@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -14,13 +15,13 @@ import type { Database } from '@/lib/supabase/database.types';
 
 type User = Awaited<ReturnType<typeof getPharmacistProfile>>['user'];
 type Profile = Awaited<ReturnType<typeof getPharmacistProfile>>['profile'];
-type SearchWithResponses = Awaited<ReturnType<typeof getAllSearchesAction>>['data'];
+type SearchWithResponsesArray = Awaited<ReturnType<typeof getAllSearchesAction>>['data'];
 
 
 export default function PharmacistDashboardPage() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [searches, setSearches] = useState<SearchWithResponses>([]);
+  const [searches, setSearches] = useState<SearchWithResponsesArray>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
