@@ -4,13 +4,11 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import type { Database } from '@/lib/supabase/database.types'
 
 export async function middleware(request: NextRequest) {
-  // Check if Supabase environment variables are set. If not, log a warning
-  // and bypass the middleware to prevent the application from crashing.
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    console.warn('Supabase URL or Anon Key is not set. Middleware will be bypassed.');
+    console.warn('Supabase URL or Anon Key is not set in .env. Middleware will be bypassed.');
     return NextResponse.next({ request });
   }
 
