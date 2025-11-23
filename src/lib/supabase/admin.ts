@@ -15,15 +15,9 @@ export const supabaseAdmin =
             // The admin client is a server-side client that uses a service role key.
             // It doesn't need to manage user sessions, so we provide dummy cookie functions.
              cookies: {
-                get(name: string) {
-                    return undefined;
-                },
-                set(name: string, value: string, options: CookieOptions) {
-                    // Do nothing
-                },
-                remove(name: string, options: CookieOptions) {
-                    // Do nothing
-                },
+                get: () => undefined,
+                set: () => {},
+                remove: () => {},
              },
         })
         : null;
