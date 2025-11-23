@@ -1,36 +1,12 @@
-
-'use client';
-
-import { useEffect, useState } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
-import { HealthPostCard } from './HealthPostCard';
 import { getHealthPostsAction } from './actions';
-import type { HealthPost } from '@/lib/types';
+import { HealthLibraryClient } from './HealthLibraryClient';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { BookOpen, AlertCircle, LoaderCircle } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { AlertCircle, BookOpen } from 'lucide-react';
 
-export default function HealthLibraryPage() {
-  const [posts, setPosts] = useState<HealthPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      const result = await getHealthPostsAction();
-
-      if (result.success && result.data) {
-        setPosts(result.data);
-      } else {
-        console.error('Error fetching health posts:', result.error);
-        setError(result.error || 'Impossible de charger les fiches santé.');
-      }
-      setLoading(false);
-    };
-
-    fetchPosts();
-  }, []);
+export default async function HealthLibraryPage() {
+  const result = await getHealthPostsAction();
 
   return (
     <PageWrapper>
@@ -46,27 +22,16 @@ export default function HealthLibraryPage() {
             </p>
           </header>
 
-          {loading ? (
-            <div className="space-y-6">
-              <Skeleton className="w-full h-48" />
-              <Skeleton className="w-full h-48" />
-            </div>
-          ) : error ? (
+          {result.error ? (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Erreur</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
+              <AlertTitle>Erreur de chargement</AlertTitle>
+              <AlertDescription>{result.error}</AlertDescription>
             </Alert>
-          ) : posts.length > 0 ? (
-            <div className="border rounded-lg">
-              {posts.map((post, index) => (
-                <div key={post.id} className={index === posts.length - 1 ? '' : 'border-b'}>
-                   <HealthPostCard post={post} />
-                </div>
-              ))}
-            </div>
+          ) : result.data && result.data.length > 0 ? (
+            <HealthLibraryClient initialPosts={result.data} />
           ) : (
-            <Alert>
+             <Alert>
               <BookOpen className="h-4 w-4" />
               <AlertTitle>Aucun article disponible</AlertTitle>
               <AlertDescription>
