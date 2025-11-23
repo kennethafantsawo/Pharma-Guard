@@ -26,7 +26,7 @@ export async function getUserProfile(): Promise<{data: Database['public']['Table
 }
 
 const CreateSearchSchema = z.object({
-    clientId: z.string().uuid(),
+    clientPhone: z.string().min(8, "Le numéro de téléphone est requis."),
     productName: z.string().optional(),
     images: z.array(z.instanceof(File)).optional(),
 });
@@ -37,14 +37,14 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     }
 
     const rawData = {
-        clientId: formData.get('clientId'),
+        clientPhone: formData.get('clientPhone'),
         productName: formData.get('productName') || undefined,
         images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
     };
     
     const validatedFields = CreateSearchSchema.safeParse({
         ...rawData,
-        clientId: rawData.clientId as string
+        clientPhone: rawData.clientPhone as string
     });
 
     if (!validatedFields.success) {
@@ -52,13 +52,14 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         return { success: false, error: 'Données de recherche invalides.' };
     }
 
-    const { clientId, productName, images } = validatedFields.data;
+    const { clientPhone, productName, images } = validatedFields.data;
     const imageUrls: string[] = [];
+    const searchId = crypto.randomUUID(); // Unique ID for this search
 
     try {
         if (images && images.length > 0) {
             for (const image of images) {
-                const fileName = `${clientId}/${Date.now()}-${image.name}`;
+                const fileName = `${searchId}/${Date.now()}-${image.name}`;
                 const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
                     .from('demands')
                     .upload(fileName, image, {
@@ -84,7 +85,9 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
-                client_id: clientId,
+                // We generate a client_id from the phone number for simplicity, but it's not a real user ID
+                client_id: `phone-${clientPhone}`, 
+                client_phone: clientPhone,
                 original_product_name: productName,
                 product_name: processedName,
                 photo_urls: imageUrls.length > 0 ? imageUrls : null,
@@ -103,20 +106,20 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     }
 }
 
-export async function getSearchesByClientAction(clientId: string) {
+export async function getSearchesByClientAction(clientPhone: string) {
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.', data: null };
     }
 
-    if (!clientId) {
-        return { success: false, error: 'ID Client manquant.', data: null };
+    if (!clientPhone) {
+        return { success: false, error: 'Numéro de téléphone manquant.', data: null };
     }
 
     try {
         const { data, error } = await supabaseAdmin
             .from('searches')
             .select('*')
-            .eq('client_id', clientId)
+            .eq('client_phone', clientPhone)
             .order('created_at', { ascending: false });
 
         if (error) {

@@ -226,6 +226,7 @@ export type Database = {
       searches: {
         Row: {
           client_id: string
+          client_phone: string | null
           created_at: string
           id: number
           original_product_name: string | null
@@ -234,6 +235,7 @@ export type Database = {
         }
         Insert: {
           client_id: string
+          client_phone?: string | null
           created_at?: string
           id?: number
           original_product_name?: string | null
@@ -242,21 +244,14 @@ export type Database = {
         }
         Update: {
           client_id?: string
+          client_phone?: string | null
           created_at?: string
           id?: number
           original_product_name?: string | null
           photo_urls?: string[] | null
           product_name?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "public_searches_client_id_fkey"
-            columns: ["client_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       user_feedback: {
         Row: {
@@ -396,5 +391,3 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
-
-    

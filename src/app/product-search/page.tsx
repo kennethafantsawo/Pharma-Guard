@@ -1,69 +1,11 @@
 
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
-import { Search, LogOut, LoaderCircle } from 'lucide-react';
-import { AuthForm } from './AuthForm';
+import { Search } from 'lucide-react';
 import { SearchForm } from './SearchForm';
-import type { Database } from '@/lib/supabase/client';
-import { RecentSearches } from './RecentSearches';
-import { Separator } from '@/components/ui/separator';
-import { supabase } from '@/lib/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { getUserProfile } from './actions';
-
-type Profile = Database['public']['Tables']['profiles']['Row'];
 
 export default function ProductSearchPage() {
-  const [user, setUser] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [isLoggingOut, startLogoutTransition] = useTransition();
-  const [lastSearchTimestamp, setLastSearchTimestamp] = useState(Date.now());
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      setLoading(true);
-      const { data: userProfile } = await getUserProfile();
-      setUser(userProfile);
-      setLoading(false);
-    };
-
-    checkUser();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          checkUser();
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-  
-  const handleNewSearch = () => {
-    setLastSearchTimestamp(Date.now());
-  };
-
-  const handleLogout = async () => {
-    startLogoutTransition(async () => {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        toast({ title: 'Erreur', description: 'Impossible de se déconnecter.', variant: 'destructive' });
-      } else {
-        setUser(null);
-        toast({ title: 'Déconnecté', description: 'Vous avez été déconnecté avec succès.' });
-      }
-    });
-  };
 
   return (
     <PageWrapper>
@@ -75,30 +17,11 @@ export default function ProductSearchPage() {
             </div>
             <h1 className="text-4xl font-bold font-headline text-foreground mt-4">Rechercher un Produit</h1>
             <p className="text-muted-foreground mt-2 text-lg">
-              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous.
+              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous. Renseignez votre numéro pour être contacté.
             </p>
           </header>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-32">
-                <LoaderCircle className="animate-spin h-8 w-8 text-muted-foreground" />
-            </div>
-          ) : user ? (
-            <div className="space-y-12">
-               <div className="text-center space-y-2">
-                <p>Connecté en tant que <span className="font-bold text-accent">{user.username}</span></p>
-                <Button variant="ghost" size="sm" onClick={handleLogout} disabled={isLoggingOut}>
-                  {isLoggingOut ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <LogOut className="mr-2 h-4 w-4"/>}
-                  Se déconnecter
-                </Button>
-              </div>
-              <SearchForm user={user} onNewSearch={handleNewSearch} />
-              <Separator />
-              <RecentSearches user={user} key={lastSearchTimestamp} />
-            </div>
-          ) : (
-            <AuthForm />
-          )}
+          
+          <SearchForm />
 
         </div>
       </div>
