@@ -5,23 +5,27 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn, LayoutDashboard } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
 const navLinks = [
   { href: '/pharmacies', label: 'Pharmacies', icon: Pill },
   { href: '/product-search', label: 'Chercher Produit', icon: Search },
-  { href: '/health-library', label: 'Bibliothèque Santé', icon: BookOpen },
+  { href: '/health-library', label: 'Fiches Santé', icon: BookOpen },
   { href: '/feedback', label: 'Avis', icon: Star },
-  { href: '/admin', label: 'Options', icon: Settings },
+];
+
+const adminLinks = [
+    { href: '/admin', label: 'Options', icon: Settings },
 ];
 
 export function Header() {
   const pathname = usePathname();
 
   const NavLinks = ({ inSheet = false }: { inSheet?: boolean }) => (
-    navLinks.map(({ href, label, icon: Icon }) => (
+    <>
+    {navLinks.map(({ href, label, icon: Icon }) => (
       <Button
         key={href}
         variant="ghost"
@@ -39,7 +43,27 @@ export function Header() {
           {label}
         </Link>
       </Button>
-    ))
+    ))}
+    {adminLinks.map(({ href, label, icon: Icon }) => (
+      <Button
+        key={href}
+        variant="ghost"
+        asChild
+        className={cn(
+          'font-semibold tracking-wide',
+          pathname === href
+            ? 'text-accent hover:text-accent'
+            : 'text-foreground/70 hover:text-foreground',
+          inSheet && 'w-full justify-start text-base'
+        )}
+      >
+        <Link href={href}>
+          {Icon && <Icon className="mr-2 h-5 w-5" />}
+          {label}
+        </Link>
+      </Button>
+    ))}
+    </>
   );
 
   return (
@@ -56,8 +80,8 @@ export function Header() {
             <NavLinks />
           </nav>
            <Button asChild variant="outline" className="hidden md:flex">
-              <Link href="/pharmacist-auth">
-                <LogIn className="mr-2 h-4 w-4" /> Espace Pharmacien
+              <Link href="/pharmacist-dashboard">
+                <LayoutDashboard className="mr-2 h-4 w-4" /> Espace Pharmacien
               </Link>
             </Button>
           <ThemeToggle />
@@ -75,8 +99,8 @@ export function Header() {
                   <NavLinks inSheet />
                    <div className="border-t pt-4">
                      <Button asChild variant="outline" className="w-full justify-center">
-                        <Link href="/pharmacist-auth">
-                            <LogIn className="mr-2 h-4 w-4" /> Espace Pharmacien
+                        <Link href="/pharmacist-dashboard">
+                            <LayoutDashboard className="mr-2 h-4 w-4" /> Espace Pharmacien
                         </Link>
                      </Button>
                    </div>
