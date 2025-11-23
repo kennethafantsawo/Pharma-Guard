@@ -4,7 +4,7 @@
 import { useEffect, useState } from 'react';
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { HealthPostCard } from './HealthPostCard';
-import { supabase } from '@/lib/supabase/client';
+import { getHealthPostsAction } from './actions';
 import type { HealthPost } from '@/lib/types';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { BookOpen, AlertCircle, LoaderCircle } from 'lucide-react';
@@ -17,23 +17,14 @@ export default function HealthLibraryPage() {
 
   useEffect(() => {
     const fetchPosts = async () => {
-      if (!supabase) {
-        setError("La connexion à la base de données n'est pas configurée.");
-        setLoading(false);
-        return;
-      }
       setLoading(true);
-      const { data, error } = await supabase
-        .from('health_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false });
+      const result = await getHealthPostsAction();
 
-      if (error) {
-        console.error('Error fetching health posts:', error);
-        setError('Impossible de charger les fiches santé.');
+      if (result.success && result.data) {
+        setPosts(result.data);
       } else {
-        setPosts(data as HealthPost[]);
+        console.error('Error fetching health posts:', result.error);
+        setError(result.error || 'Impossible de charger les fiches santé.');
       }
       setLoading(false);
     };

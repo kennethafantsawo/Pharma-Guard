@@ -3,6 +3,30 @@
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
+import type { HealthPost } from '@/lib/types';
+
+
+export async function getHealthPostsAction(): Promise<{ success: boolean; data?: HealthPost[]; error?: string; }> {
+  if (!supabaseAdmin) {
+    return { success: false, error: 'Configuration Supabase manquante.' };
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('health_posts')
+      .select('*')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data: data as HealthPost[] };
+  } catch (err) {
+    console.error('Error fetching health posts:', err);
+    const message = err instanceof Error ? err.message : 'Une erreur est survenue lors du chargement des fiches santé.';
+    return { success: false, error: message };
+  }
+}
 
 export async function incrementLikeAction(postId: number, decrement: boolean = false) {
   if (!supabaseAdmin) {
