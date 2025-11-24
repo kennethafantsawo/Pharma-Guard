@@ -8,19 +8,38 @@ import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/client';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
-export async function getUserProfile(): Promise<{data: Database['public']['Tables']['profiles']['Row'] | null}> {
+export async function getUserProfileAction(): Promise<{data: Database['public']['Tables']['profiles']['Row'] | null}> {
     const supabase = createSupabaseServerClient();
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { user } } = await supabase.auth.getUser();
 
-    if (!session) {
+    if (!user) {
         return { data: null };
     }
 
     const { data: profile } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', session.user.id)
+        .eq('id', user.id)
         .single();
+    
+    // Auto-create profile for new users
+    if (!profile) {
+       const { data: newProfile, error } = await supabase
+            .from('profiles')
+            .insert({
+                id: user.id,
+                username: user.user_metadata.full_name || user.email || 'Nouveau Client',
+                role: 'Client',
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Error creating client profile:", error);
+            return { data: null };
+        }
+        return { data: newProfile };
+    }
     
     return { data: profile };
 }
@@ -35,6 +54,13 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.' };
     }
+    
+    const supabase = createSupabaseServerClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+        return { success: false, error: 'Vous devez être connecté pour faire une demande.' };
+    }
+
 
     const rawData = {
         clientPhone: formData.get('clientPhone'),
@@ -85,8 +111,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
-                // We generate a client_id from the phone number for simplicity, but it's not a real user ID
-                client_id: `phone-${clientPhone}`, 
+                client_id: user.id, 
                 client_phone: clientPhone,
                 original_product_name: productName,
                 product_name: processedName,
@@ -106,20 +131,20 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     }
 }
 
-export async function getSearchesByClientAction(clientPhone: string) {
+export async function getSearchesByClientAction(userId: string) {
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.', data: null };
     }
 
-    if (!clientPhone) {
-        return { success: false, error: 'Numéro de téléphone manquant.', data: null };
+    if (!userId) {
+        return { success: false, error: 'Identifiant utilisateur manquant.', data: null };
     }
 
     try {
         const { data, error } = await supabaseAdmin
             .from('searches')
-            .select('*')
-            .eq('client_phone', clientPhone)
+            .select('*, responses(*)')
+            .eq('client_id', userId)
             .order('created_at', { ascending: false });
 
         if (error) {

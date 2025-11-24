@@ -1,16 +1,19 @@
-
-'use client';
+'use server';
 
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Search } from 'lucide-react';
 import { SearchForm } from './SearchForm';
+import { AuthForm } from './AuthForm';
+import { RecentSearches } from './RecentSearches';
+import { getUserProfileAction } from './actions';
 
-export default function ProductSearchPage() {
+export default async function ProductSearchPage() {
+  const { data: user } = await getUserProfileAction();
 
   return (
     <PageWrapper>
       <div className="container mx-auto px-4 md:px-6 py-8 animate-in fade-in duration-500">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto space-y-12">
           <header className="mb-8 text-center">
             <div className="inline-block p-4 bg-accent/10 rounded-xl">
               <Search className="h-10 w-10 text-accent" />
@@ -21,7 +24,14 @@ export default function ProductSearchPage() {
             </p>
           </header>
           
-          <SearchForm />
+          {user ? (
+            <>
+              <SearchForm />
+              <RecentSearches user={user} />
+            </>
+          ) : (
+            <AuthForm />
+          )}
 
         </div>
       </div>

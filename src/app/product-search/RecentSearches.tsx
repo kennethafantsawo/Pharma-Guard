@@ -3,22 +3,25 @@
 
 import { useState, useEffect } from 'react';
 import { getSearchesByClientAction } from './actions';
-import type { Database } from '@/lib/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Inbox, AlertCircle } from 'lucide-react';
 import { SearchCard } from './SearchCard';
+import type { Database } from '@/lib/supabase/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
-type Search = Database['public']['Tables']['searches']['Row'];
+type SearchWithResponses = Database['public']['Tables']['searches']['Row'] & {
+  responses: Database['public']['Tables']['responses']['Row'][];
+};
+
 
 interface RecentSearchesProps {
   user: Profile;
 }
 
 export function RecentSearches({ user }: RecentSearchesProps) {
-  const [searches, setSearches] = useState<Search[]>([]);
+  const [searches, setSearches] = useState<SearchWithResponses[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -30,7 +33,7 @@ export function RecentSearches({ user }: RecentSearchesProps) {
       const result = await getSearchesByClientAction(user.id);
 
       if (result.success && result.data) {
-        setSearches(result.data);
+        setSearches(result.data as SearchWithResponses[]);
       } else {
         setError(result.error || 'Une erreur est survenue.');
         toast({
