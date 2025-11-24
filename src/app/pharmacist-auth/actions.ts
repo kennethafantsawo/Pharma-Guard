@@ -11,12 +11,9 @@ export async function signInAsPharmacistAction(): Promise<{ url?: string; error?
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      // redirectTo est géré par le middleware et la config Supabase pour plus de fiabilité.
-      // Le middleware interceptera le callback et redirigera correctement.
-      // Le paramètre 'next' dans l'URL de callback est géré par le middleware.
       redirectTo: `${origin}/auth/callback?next=/pharmacist-dashboard`,
       queryParams: {
-        prompt: 'consent', // Force l'écran de consentement, utile pour le debug
+        prompt: 'consent',
       }
     },
   });
@@ -42,16 +39,13 @@ export async function getPharmacistProfile() {
         .eq('id', user.id)
         .single();
     
-    // This is a crucial step: if a user logs in but has no profile,
-    // it means they are a new user. We must create a profile for them
-    // with the 'Pharmacien' role.
     if (!profile) {
         const { data: newProfile, error } = await supabase
             .from('profiles')
             .insert({
                 id: user.id,
                 username: user.user_metadata.full_name || user.email || 'Nouveau Pharmacien',
-                role: 'Pharmacien', // Assign the 'Pharmacien' role
+                role: 'Pharmacien',
             })
             .select()
             .single();
@@ -63,7 +57,6 @@ export async function getPharmacistProfile() {
         return { user, profile: newProfile };
     }
 
-    // Also ensure their role is Pharmacien if they exist
     if (profile.role !== 'Pharmacien') {
         const { data: updatedProfile, error } = await supabase
             .from('profiles')

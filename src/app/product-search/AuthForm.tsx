@@ -31,8 +31,6 @@ export function AuthForm() {
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            // On retire redirectTo pour se fier uniquement à la configuration Supabase et au middleware.
-            // La redirection vers /product-search sera gérée par le callback.
             redirectTo: `${window.location.origin}/auth/callback?next=/product-search`,
             queryParams: {
                 prompt: 'consent',
