@@ -18,7 +18,7 @@ export interface HealthPost {
   content: string;
   image_url: string | null;
   likes: number;
-  published_at: string | null;
+  publish_at: string | null;
   status: 'published' | 'draft' | 'scheduled';
 }
 

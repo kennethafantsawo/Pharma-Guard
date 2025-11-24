@@ -15,7 +15,7 @@ export async function getHealthPostsAction(): Promise<{ success: boolean; data?:
     const { data, error } = await supabaseAdmin
       .from('health_posts')
       .select('*')
-      .order('published_at', { ascending: false });
+      .order('publish_at', { ascending: false });
 
     if (error) throw error;
 
