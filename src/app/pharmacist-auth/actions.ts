@@ -10,9 +10,12 @@ export async function signInAsPharmacistAction(): Promise<{ url?: string; error?
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
+      // redirectTo est géré par le middleware et la config Supabase pour plus de fiabilité.
+      // Le middleware interceptera le callback et redirigera correctement.
+      // Le paramètre 'next' dans l'URL de callback est géré par le middleware.
       redirectTo: `${origin}/auth/callback?next=/pharmacist-dashboard`,
       queryParams: {
-        prompt: 'consent',
+        prompt: 'consent', // Force l'écran de consentement, utile pour le debug
       }
     },
   });

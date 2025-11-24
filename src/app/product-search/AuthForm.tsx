@@ -24,10 +24,19 @@ export function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     startTransition(async () => {
+        if (!supabase) {
+            toast({ title: 'Erreur de configuration', description: 'Le client Supabase n\'a pas pu être initialisé.', variant: 'destructive' });
+            return;
+        }
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
+            // On retire redirectTo pour se fier uniquement à la configuration Supabase et au middleware.
+            // La redirection vers /product-search sera gérée par le callback.
             redirectTo: `${window.location.origin}/auth/callback?next=/product-search`,
+            queryParams: {
+                prompt: 'consent',
+            }
           },
         });
         if (error) {

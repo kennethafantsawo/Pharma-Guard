@@ -14,9 +14,12 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+    console.error('Auth callback session exchange error:', error.message);
+  } else {
+    console.error('Auth callback error: No code received.');
   }
 
+
   // return the user to an error page with instructions
-  console.error('Auth callback error: Invalid code or state.');
   return NextResponse.redirect(`${origin}/auth/auth-code-error`)
 }
