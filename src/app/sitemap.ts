@@ -7,6 +7,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     '/',
     '/pharmacies',
+    '/medication-info',
     '/product-search',
     '/health-library',
     '/feedback',

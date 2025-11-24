@@ -5,12 +5,13 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn, LayoutDashboard } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn, LayoutDashboard, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
 const navLinks = [
   { href: '/pharmacies', label: 'Pharmacies', icon: Pill },
+  { href: '/medication-info', label: 'Infos Médicaments', icon: FileText },
   { href: '/product-search', label: 'Chercher Produit', icon: Search },
   { href: '/health-library', label: 'Fiches Santé', icon: BookOpen },
   { href: '/feedback', label: 'Avis', icon: Star },
