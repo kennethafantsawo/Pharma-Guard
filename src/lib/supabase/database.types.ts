@@ -294,6 +294,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_all_pharmacy_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       increment_likes: {
         Args: {
           post_id_to_update: number
@@ -391,3 +395,5 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    
