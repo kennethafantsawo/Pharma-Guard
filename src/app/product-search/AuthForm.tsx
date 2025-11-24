@@ -24,10 +24,6 @@ export function AuthForm() {
 
   const handleGoogleSignIn = async () => {
     startTransition(async () => {
-        if (!supabase) {
-            toast({ title: 'Erreur de configuration', description: 'Le client Supabase n\'a pas pu être initialisé.', variant: 'destructive' });
-            return;
-        }
         const { error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {

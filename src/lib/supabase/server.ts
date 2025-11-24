@@ -33,10 +33,6 @@ export function createSupabaseServerClient() {
           }
         },
       },
-      //This is the important part, it tells Supabase to not store the session in memory.
-      auth: {
-        storage: null,
-      }
     }
   )
 }

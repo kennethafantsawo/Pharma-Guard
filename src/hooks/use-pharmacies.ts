@@ -32,13 +32,6 @@ export const usePharmacies = () => {
       setLoading(true);
       setError(null);
 
-      if (!supabase) {
-        setError("Configuration Supabase manquante. Veuillez ajouter NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY à votre fichier .env.");
-        setData([]);
-        setLoading(false);
-        return;
-      }
-
       try {
         // Fetch data from Supabase
         const { data: schedules, error: fetchError } = await supabase
