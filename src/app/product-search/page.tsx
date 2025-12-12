@@ -1,4 +1,3 @@
-
 'use server';
 
 import { PageWrapper } from '@/components/shared/page-wrapper';

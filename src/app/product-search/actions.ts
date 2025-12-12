@@ -1,4 +1,3 @@
-
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase/admin';
@@ -45,7 +44,6 @@ export async function getUserProfileAction(): Promise<{data: Database['public'][
 }
 
 const CreateSearchSchema = z.object({
-    clientPhone: z.string().min(8, "Le numéro de téléphone est requis."),
     productName: z.string().optional(),
     images: z.array(z.instanceof(File)).optional(),
 });
@@ -62,22 +60,18 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
     }
 
     const rawData = {
-        clientPhone: formData.get('clientPhone'),
         productName: formData.get('productName') || undefined,
         images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
     };
     
-    const validatedFields = CreateSearchSchema.safeParse({
-        ...rawData,
-        clientPhone: rawData.clientPhone as string
-    });
+    const validatedFields = CreateSearchSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
         console.error("Validation error:", validatedFields.error.flatten().fieldErrors);
         return { success: false, error: 'Données de recherche invalides.' };
     }
 
-    const { clientPhone, productName, images } = validatedFields.data;
+    const { productName, images } = validatedFields.data;
     const imageUrls: string[] = [];
     const searchId = crypto.randomUUID();
 
@@ -107,7 +101,6 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
             photoDataUris: imageUrls,
         });
 
-        // Use the authenticated user's phone for the search, not the one from the form
         const userPhone = user.phone;
         if (!userPhone) {
             return { success: false, error: "Votre numéro de téléphone n'est pas disponible dans votre session." };

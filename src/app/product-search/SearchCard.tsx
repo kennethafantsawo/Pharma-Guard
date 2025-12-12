@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -106,5 +105,3 @@ export function SearchCard({ search, isPharmacistView = false }: SearchCardProps
     </Card>
   );
 }
-
-    
