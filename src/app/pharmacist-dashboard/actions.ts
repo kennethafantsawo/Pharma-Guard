@@ -1,3 +1,4 @@
+
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -50,3 +51,5 @@ export async function getAllSearchesAction(): Promise<{
     return { success: false, error: message };
   }
 }
+
+    

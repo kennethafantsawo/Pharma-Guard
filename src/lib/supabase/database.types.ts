@@ -251,7 +251,15 @@ export type Database = {
           photo_urls?: string[] | null
           product_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "searches_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       user_feedback: {
         Row: {
@@ -395,5 +403,7 @@ export type Enums<
   : PublicEnumNameOrOptions extends keyof Database["public"]["Enums"]
   ? Database["public"]["Enums"][PublicEnumNameOrOptions]
   : never
+
+    
 
     

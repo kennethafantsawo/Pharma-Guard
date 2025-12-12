@@ -3,6 +3,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { headers } from 'next/headers';
+import type { Database } from '@/lib/supabase/database.types';
 
 export async function signInAsPharmacistAction(): Promise<{ url?: string; error?: string }> {
   const supabase = createSupabaseServerClient();
@@ -25,7 +26,10 @@ export async function signInAsPharmacistAction(): Promise<{ url?: string; error?
   return { url: data.url };
 }
 
-export async function getPharmacistProfile() {
+export async function getPharmacistProfile(): Promise<{
+    user: Database['public']['Tables']['profiles']['Row'] | null, 
+    profile: Database['public']['Tables']['profiles']['Row'] | null 
+}> {
     const supabase = createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -52,9 +56,9 @@ export async function getPharmacistProfile() {
 
         if (error) {
             console.error("Error creating pharmacist profile:", error);
-            return { user, profile: null };
+            return { user: user as any, profile: null };
         }
-        return { user, profile: newProfile };
+        return { user: user as any, profile: newProfile };
     }
 
     if (profile.role !== 'Pharmacien') {
@@ -66,15 +70,17 @@ export async function getPharmacistProfile() {
             .single();
         if (error) {
              console.error("Error updating pharmacist role:", error);
-             return { user, profile };
+             return { user: user as any, profile };
         }
-        return { user, profile: updatedProfile };
+        return { user: user as any, profile: updatedProfile };
     }
     
-    return { user, profile };
+    return { user: user as any, profile };
 }
 
 export async function signOutAction() {
     const supabase = createSupabaseServerClient();
     await supabase.auth.signOut();
 }
+
+    

@@ -1,3 +1,4 @@
+
 'use server';
 
 import { PageWrapper } from '@/components/shared/page-wrapper';
@@ -38,3 +39,5 @@ export default async function ProductSearchPage() {
     </PageWrapper>
   );
 }
+
+    

@@ -86,3 +86,5 @@ export function RecentSearches({ user }: RecentSearchesProps) {
     </div>
   );
 }
+
+    

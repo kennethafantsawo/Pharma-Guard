@@ -5,7 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/admin';
 import { z } from 'zod';
 import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
-import type { Database } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/database.types';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export async function getUserProfileAction(): Promise<{data: Database['public']['Tables']['profiles']['Row'] | null}> {
@@ -111,6 +111,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
+                id: parseInt(searchId, 16),
                 client_id: user.id, 
                 client_phone: clientPhone,
                 original_product_name: productName,
@@ -159,3 +160,5 @@ export async function getSearchesByClientAction(userId: string) {
         return { success: false, error: errorMessage, data: null };
     }
 }
+
+    

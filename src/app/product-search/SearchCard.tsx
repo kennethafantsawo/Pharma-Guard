@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Clock, HelpCircle, MessageSquare, Phone, Send, CheckCircle, Tag, Hand, User } from 'lucide-react';
-import type { Database } from '@/lib/supabase/client';
+import type { Database } from '@/lib/supabase/database.types';
 import { formatDistanceToNow } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -63,7 +63,7 @@ export function SearchCard({ search, isPharmacistView = false }: SearchCardProps
           </div>
         )}
         
-        {isPharmacistView && (
+        {isPharmacistView && search.client_phone && (
             <div className="bg-muted/50 p-3 rounded-md border text-sm">
                 <p className="font-semibold flex items-center gap-2"><User size={16} /> Contact Client</p>
                 <p className="text-muted-foreground">Numéro de téléphone : {search.client_phone}</p>
@@ -106,3 +106,5 @@ export function SearchCard({ search, isPharmacistView = false }: SearchCardProps
     </Card>
   );
 }
+
+    
