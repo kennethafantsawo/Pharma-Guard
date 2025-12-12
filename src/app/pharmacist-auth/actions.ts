@@ -1,58 +1,34 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { headers } from 'next/headers';
 import type { Database } from '@/lib/supabase/database.types';
 import { z } from 'zod';
+import { headers } from 'next/headers';
 
-const phoneSchema = z.string().min(8, 'Le numéro de téléphone doit être valide.');
-const tokenSchema = z.string().min(6, 'Le code doit contenir 6 chiffres.');
+const emailSchema = z.string().email('L\'adresse e-mail doit être valide.');
 
-export async function signInWithPhoneAction(phone: string): Promise<{ success: boolean; error?: string }> {
-    const validatedPhone = phoneSchema.safeParse(phone);
-    if (!validatedPhone.success) {
-        return { success: false, error: 'Numéro de téléphone invalide.' };
+export async function signInWithEmailAction(email: string): Promise<{ success: boolean; error?: string }> {
+    const validatedEmail = emailSchema.safeParse(email);
+    if (!validatedEmail.success) {
+        return { success: false, error: 'Adresse e-mail invalide.' };
     }
 
     const supabase = createSupabaseServerClient();
+    const origin = headers().get('origin');
+
     const { error } = await supabase.auth.signInWithOtp({
-        phone: validatedPhone.data,
+        email: validatedEmail.data,
+        options: {
+            // Le lien magique renverra l'utilisateur à la page de callback,
+            // qui le redirigera ensuite vers le tableau de bord.
+            emailRedirectTo: `${origin}/auth/callback?next=/pharmacist-dashboard`,
+        },
     });
 
     if (error) {
-        console.error("SignInWithOtp Error:", error);
-        return { success: false, error: "Impossible d'envoyer le code. Assurez-vous que le numéro est correct." };
+        console.error("signInWithOtp (magic link) Error:", error);
+        return { success: false, error: "Impossible d'envoyer le lien de connexion. Assurez-vous que l'e-mail est correct." };
     }
-    return { success: true };
-}
-
-export async function verifyOtpAction(phone: string, token: string): Promise<{ success: boolean; error?: string }> {
-    const validatedPhone = phoneSchema.safeParse(phone);
-    const validatedToken = tokenSchema.safeParse(token);
-
-    if (!validatedPhone.success || !validatedToken.success) {
-        return { success: false, error: 'Données invalides.' };
-    }
-
-    const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.auth.verifyOtp({
-        phone: validatedPhone.data,
-        token: validatedToken.data,
-        type: 'sms',
-    });
-
-    if (error || !data.session) {
-        console.error("VerifyOtp Error:", error);
-        return { success: false, error: 'Le code est incorrect ou a expiré.' };
-    }
-
-    // Ensure profile exists and has the correct role
-    const { data: profile, error: profileError } = await getPharmacistProfile();
-
-    if(profileError || !profile) {
-        return { success: false, error: profileError || "Impossible de récupérer ou créer le profil." };
-    }
-
     return { success: true };
 }
 
@@ -81,7 +57,7 @@ export async function getPharmacistProfile(): Promise<{
             .from('profiles')
             .insert({
                 id: user.id,
-                username: user.phone || 'Nouveau Pharmacien',
+                username: user.email || 'Nouveau Pharmacien',
                 role: 'Pharmacien', // Assign 'Pharmacien' role
             })
             .select()

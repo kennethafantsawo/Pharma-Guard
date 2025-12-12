@@ -3,18 +3,13 @@
 import { PageWrapper } from '@/components/shared/page-wrapper';
 import { Search } from 'lucide-react';
 import { SearchForm } from './SearchForm';
-import { AuthForm } from './AuthForm';
 import { RecentSearches } from './RecentSearches';
-import { getUserProfileAction } from './actions';
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function ProductSearchPage() {
-  const { data: userProfile } = await getUserProfileAction();
-  const supabase = createSupabaseServerClient();
-  const { data: { session } } = await supabase.auth.getSession();
-
-  const user = session?.user;
-
+  // Client-side is now anonymous, so we don't check for a user session here.
+  // We can decide later if we want to track anonymous sessions.
+  
   return (
     <PageWrapper>
       <div className="container mx-auto px-4 md:px-6 py-8 animate-in fade-in duration-500">
@@ -25,19 +20,13 @@ export default async function ProductSearchPage() {
             </div>
             <h1 className="text-4xl font-bold font-headline text-foreground mt-4">Rechercher un Produit</h1>
             <p className="text-muted-foreground mt-2 text-lg">
-              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous.
+              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous, sans avoir besoin de créer un compte.
             </p>
           </header>
           
-          {user && userProfile ? (
-            <>
-              <SearchForm user={user} />
-              <RecentSearches user={userProfile} />
-            </>
-          ) : (
-            <AuthForm />
-          )}
-
+          <SearchForm />
+          {/* We remove RecentSearches as it requires a user session.
+              We can re-introduce this later with anonymous session tracking if needed. */}
         </div>
       </div>
     </PageWrapper>

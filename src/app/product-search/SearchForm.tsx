@@ -13,9 +13,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, Paperclip, Send, X, Phone, User, LogOut } from 'lucide-react';
+import { LoaderCircle, Paperclip, Send, X } from 'lucide-react';
 import { createSearchAction } from './actions';
-import { createSupabaseClient } from '@/lib/supabase/client';
 
 const MAX_IMAGES = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -23,6 +22,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const SearchSchema = z.object({
   productName: z.string().optional(),
   images: z.custom<FileList>().optional(),
+  contactPhone: z.string().min(8, 'Veuillez entrer un numéro de téléphone valide pour être contacté.'),
 }).refine(data => data.productName || (data.images && data.images.length > 0), {
   message: 'Veuillez entrer un nom de produit ou ajouter au moins une image.',
   path: ['productName'],
@@ -30,23 +30,16 @@ const SearchSchema = z.object({
 
 type SearchValues = z.infer<typeof SearchSchema>;
 
-interface SearchFormProps {
-  user: { id: string; phone?: string | null };
-}
-
-export function SearchForm({ user }: SearchFormProps) {
+export function SearchForm() {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const form = useForm<SearchValues>({
     resolver: zodResolver(SearchSchema),
+    defaultValues: {
+      contactPhone: '+228'
+    }
   });
-
-  const handleSignOut = async () => {
-    const supabase = createSupabaseClient();
-    await supabase.auth.signOut();
-    window.location.reload();
-  }
   
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -106,7 +99,7 @@ export function SearchForm({ user }: SearchFormProps) {
   const onSubmit: SubmitHandler<SearchValues> = (data) => {
     startTransition(async () => {
       const formData = new FormData();
-      // The user phone is now handled on the server via their session
+      formData.append('contactPhone', data.contactPhone);
       if(data.productName) formData.append('productName', data.productName);
       if(data.images) {
         for(let i=0; i<data.images.length; i++) {
@@ -117,8 +110,8 @@ export function SearchForm({ user }: SearchFormProps) {
       const result = await createSearchAction(formData);
 
       if (result.success) {
-        toast({ title: 'Demande envoyée !', description: 'Les pharmacies à proximité seront notifiées. Vous recevrez une réponse ici.' });
-        form.reset({ productName: '' });
+        toast({ title: 'Demande envoyée !', description: 'Les pharmacies à proximité seront notifiées. Vous recevrez une réponse par téléphone.' });
+        form.reset({ productName: '', contactPhone: '+228' });
         setImagePreviews([]);
         form.setValue('images', undefined);
       } else {
@@ -130,20 +123,11 @@ export function SearchForm({ user }: SearchFormProps) {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Nouvelle demande</CardTitle>
-            <CardDescription>
-              Décrivez un produit ou joignez sa photo. Les pharmacies vous répondront.
-            </CardDescription>
-          </div>
-          <Button onClick={handleSignOut} variant="outline" size="sm"><LogOut className="mr-2" />Déconnexion</Button>
-        </div>
-         <div className="pt-4">
-            <div className="flex items-center space-x-2 text-sm text-muted-foreground p-3 bg-muted rounded-md border">
-              <User className="h-5 w-5 text-primary" />
-              <span>Connecté en tant que: <span className="font-semibold text-foreground">{user.phone}</span></span>
-            </div>
+        <div>
+          <CardTitle>Nouvelle demande</CardTitle>
+          <CardDescription>
+            Décrivez un produit ou joignez sa photo. Les pharmacies vous répondront par téléphone.
+          </CardDescription>
         </div>
       </CardHeader>
       <CardContent>
@@ -206,6 +190,19 @@ export function SearchForm({ user }: SearchFormProps) {
                     ))}
                 </div>
             )}
+             <FormField
+                control={form.control}
+                name="contactPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Votre numéro de téléphone de contact</FormLabel>
+                    <FormControl>
+                        <Input type="tel" placeholder="+228..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
             <Button type="submit" disabled={isPending} className="w-full">
               {isPending ? <LoaderCircle className="animate-spin" /> : <Send />}

@@ -1,4 +1,3 @@
-
 export type Json =
   | string
   | number
@@ -225,7 +224,7 @@ export type Database = {
       }
       searches: {
         Row: {
-          client_id: string
+          client_id: string | null
           client_phone: string | null
           created_at: string
           id: number
@@ -234,7 +233,7 @@ export type Database = {
           product_name: string
         }
         Insert: {
-          client_id: string
+          client_id?: string | null
           client_phone?: string | null
           created_at?: string
           id?: number
@@ -243,7 +242,7 @@ export type Database = {
           product_name: string
         }
         Update: {
-          client_id?: string
+          client_id?: string | null
           client_phone?: string | null
           created_at?: string
           id?: number

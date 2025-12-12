@@ -21,24 +21,7 @@ export async function getUserProfileAction(): Promise<{data: Database['public'][
         .eq('id', user.id)
         .single();
     
-    // Auto-create profile for new users
-    if (!profile) {
-       const { data: newProfile, error } = await supabase
-            .from('profiles')
-            .insert({
-                id: user.id,
-                username: user.phone || 'Nouveau Client',
-                role: 'Client',
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error("Error creating client profile:", error);
-            return { data: null };
-        }
-        return { data: newProfile };
-    }
+    // This part is now only for pharmacists, client profile creation is removed.
     
     return { data: profile };
 }
@@ -46,32 +29,28 @@ export async function getUserProfileAction(): Promise<{data: Database['public'][
 const CreateSearchSchema = z.object({
     productName: z.string().optional(),
     images: z.array(z.instanceof(File)).optional(),
+    contactPhone: z.string().min(8, 'Le numéro de contact est invalide.'),
 });
 
 export async function createSearchAction(formData: FormData): Promise<{success: boolean, error?: string}> {
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.' };
     }
-    
-    const supabase = createSupabaseServerClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return { success: false, error: 'Vous devez être connecté pour faire une demande.' };
-    }
 
     const rawData = {
         productName: formData.get('productName') || undefined,
         images: formData.getAll('images').filter(f => (f instanceof File) && f.size > 0) as File[],
+        contactPhone: formData.get('contactPhone'),
     };
     
     const validatedFields = CreateSearchSchema.safeParse(rawData);
 
     if (!validatedFields.success) {
         console.error("Validation error:", validatedFields.error.flatten().fieldErrors);
-        return { success: false, error: 'Données de recherche invalides.' };
+        return { success: false, error: validatedFields.error.flatten().fieldErrors.contactPhone?.[0] || 'Données de recherche invalides.' };
     }
 
-    const { productName, images } = validatedFields.data;
+    const { productName, images, contactPhone } = validatedFields.data;
     const imageUrls: string[] = [];
     const searchId = crypto.randomUUID();
 
@@ -101,16 +80,12 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
             photoDataUris: imageUrls,
         });
 
-        const userPhone = user.phone;
-        if (!userPhone) {
-            return { success: false, error: "Votre numéro de téléphone n'est pas disponible dans votre session." };
-        }
-
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
-                client_id: user.id, 
-                client_phone: userPhone,
+                // client_id is now nullable as the user is anonymous
+                client_id: null, 
+                client_phone: contactPhone,
                 original_product_name: productName,
                 product_name: processedName,
                 photo_urls: imageUrls.length > 0 ? imageUrls : null,
@@ -157,54 +132,4 @@ export async function getSearchesByClientAction(userId: string) {
         const errorMessage = error instanceof Error ? error.message : 'Une erreur inconnue est survenue.';
         return { success: false, error: errorMessage, data: null };
     }
-}
-
-
-// --- New Phone Auth Actions ---
-
-const phoneSchema = z.string().min(8, 'Le numéro de téléphone doit être valide.');
-const tokenSchema = z.string().min(6, 'Le code doit contenir 6 chiffres.');
-
-export async function signInWithPhoneClientAction(phone: string): Promise<{ success: boolean; error?: string }> {
-    const validatedPhone = phoneSchema.safeParse(phone);
-    if (!validatedPhone.success) {
-        return { success: false, error: 'Numéro de téléphone invalide.' };
-    }
-
-    const supabase = createSupabaseServerClient();
-    const { error } = await supabase.auth.signInWithOtp({
-        phone: validatedPhone.data,
-    });
-
-    if (error) {
-        console.error("Client SignInWithOtp Error:", error);
-        return { success: false, error: "Impossible d'envoyer le code. Assurez-vous que le numéro est correct." };
-    }
-    return { success: true };
-}
-
-export async function verifyOtpClientAction(phone: string, token: string): Promise<{ success: boolean; error?: string }> {
-    const validatedPhone = phoneSchema.safeParse(phone);
-    const validatedToken = tokenSchema.safeParse(token);
-
-    if (!validatedPhone.success || !validatedToken.success) {
-        return { success: false, error: 'Données invalides.' };
-    }
-
-    const supabase = createSupabaseServerClient();
-    const { data, error } = await supabase.auth.verifyOtp({
-        phone: validatedPhone.data,
-        token: validatedToken.data,
-        type: 'sms',
-    });
-
-    if (error || !data.session) {
-        console.error("Client VerifyOtp Error:", error);
-        return { success: false, error: 'Le code est incorrect ou a expiré.' };
-    }
-
-    // This will trigger profile creation on the next load if needed
-    revalidatePath('/product-search');
-
-    return { success: true };
 }
