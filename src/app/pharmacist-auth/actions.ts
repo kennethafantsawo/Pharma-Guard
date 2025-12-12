@@ -1,3 +1,4 @@
+
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -14,7 +15,11 @@ export async function signInWithEmailAction(email: string): Promise<{ success: b
     }
 
     const supabase = createSupabaseServerClient();
-    const origin = headers().get('origin');
+    const origin = process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!origin) {
+        return { success: false, error: "La configuration de l'application est incomplète. L'URL de l'application n'est pas définie." };
+    }
 
     const { error } = await supabase.auth.signInWithOtp({
         email: validatedEmail.data,
