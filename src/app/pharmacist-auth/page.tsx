@@ -1,8 +1,8 @@
+
 'use client';
 
 import { useState, useTransition } from 'react';
 import { useForm, type SubmitHandler } from 'react-hook-form';
-import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +29,9 @@ export default function PharmacistAuthPage() {
 
   const form = useForm<EmailValues>({
     resolver: zodResolver(EmailSchema),
+    defaultValues: {
+      email: '',
+    },
   });
 
   const handleEmailSubmit: SubmitHandler<EmailValues> = (data) => {
@@ -104,3 +107,4 @@ export default function PharmacistAuthPage() {
     </PageWrapper>
   );
 }
+
