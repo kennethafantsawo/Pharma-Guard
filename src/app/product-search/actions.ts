@@ -28,7 +28,7 @@ export async function getUserProfileAction(): Promise<{data: Database['public'][
             .from('profiles')
             .insert({
                 id: user.id,
-                username: user.user_metadata.full_name || user.email || 'Nouveau Client',
+                username: user.phone || 'Nouveau Client',
                 role: 'Client',
             })
             .select()
@@ -61,7 +61,6 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         return { success: false, error: 'Vous devez être connecté pour faire une demande.' };
     }
 
-
     const rawData = {
         clientPhone: formData.get('clientPhone'),
         productName: formData.get('productName') || undefined,
@@ -80,7 +79,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
 
     const { clientPhone, productName, images } = validatedFields.data;
     const imageUrls: string[] = [];
-    const searchId = crypto.randomUUID(); // Unique ID for this search
+    const searchId = crypto.randomUUID();
 
     try {
         if (images && images.length > 0) {
@@ -108,12 +107,17 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
             photoDataUris: imageUrls,
         });
 
+        // Use the authenticated user's phone for the search, not the one from the form
+        const userPhone = user.phone;
+        if (!userPhone) {
+            return { success: false, error: "Votre numéro de téléphone n'est pas disponible dans votre session." };
+        }
+
         const { error: insertError } = await supabaseAdmin
             .from('searches')
             .insert({
-                id: parseInt(searchId, 16),
                 client_id: user.id, 
-                client_phone: clientPhone,
+                client_phone: userPhone,
                 original_product_name: productName,
                 product_name: processedName,
                 photo_urls: imageUrls.length > 0 ? imageUrls : null,
@@ -122,6 +126,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
         if (insertError) throw new Error(`Erreur lors de l'enregistrement de la recherche : ${insertError.message}`);
         
         revalidatePath('/product-search');
+        revalidatePath('/pharmacist-dashboard');
 
         return { success: true };
 
@@ -161,4 +166,52 @@ export async function getSearchesByClientAction(userId: string) {
     }
 }
 
-    
+
+// --- New Phone Auth Actions ---
+
+const phoneSchema = z.string().min(8, 'Le numéro de téléphone doit être valide.');
+const tokenSchema = z.string().min(6, 'Le code doit contenir 6 chiffres.');
+
+export async function signInWithPhoneClientAction(phone: string): Promise<{ success: boolean; error?: string }> {
+    const validatedPhone = phoneSchema.safeParse(phone);
+    if (!validatedPhone.success) {
+        return { success: false, error: 'Numéro de téléphone invalide.' };
+    }
+
+    const supabase = createSupabaseServerClient();
+    const { error } = await supabase.auth.signInWithOtp({
+        phone: validatedPhone.data,
+    });
+
+    if (error) {
+        console.error("Client SignInWithOtp Error:", error);
+        return { success: false, error: "Impossible d'envoyer le code. Assurez-vous que le numéro est correct." };
+    }
+    return { success: true };
+}
+
+export async function verifyOtpClientAction(phone: string, token: string): Promise<{ success: boolean; error?: string }> {
+    const validatedPhone = phoneSchema.safeParse(phone);
+    const validatedToken = tokenSchema.safeParse(token);
+
+    if (!validatedPhone.success || !validatedToken.success) {
+        return { success: false, error: 'Données invalides.' };
+    }
+
+    const supabase = createSupabaseServerClient();
+    const { data, error } = await supabase.auth.verifyOtp({
+        phone: validatedPhone.data,
+        token: validatedToken.data,
+        type: 'sms',
+    });
+
+    if (error || !data.session) {
+        console.error("Client VerifyOtp Error:", error);
+        return { success: false, error: 'Le code est incorrect ou a expiré.' };
+    }
+
+    // This will trigger profile creation on the next load if needed
+    revalidatePath('/product-search');
+
+    return { success: true };
+}

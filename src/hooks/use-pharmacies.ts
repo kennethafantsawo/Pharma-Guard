@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { type WeekSchedule } from '@/lib/types';
 import { isDateInWeek, parseWeekString } from '@/lib/date-utils';
-import { supabase } from '@/lib/supabase/client';
+import { createSupabaseClient } from '@/lib/supabase/client';
 
 export const usePharmacies = () => {
   const [data, setData] = useState<WeekSchedule[]>([]);
@@ -29,6 +29,7 @@ export const usePharmacies = () => {
   
   useEffect(() => {
     const loadData = async () => {
+      const supabase = createSupabaseClient();
       setLoading(true);
       setError(null);
 

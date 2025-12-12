@@ -7,9 +7,14 @@ import { SearchForm } from './SearchForm';
 import { AuthForm } from './AuthForm';
 import { RecentSearches } from './RecentSearches';
 import { getUserProfileAction } from './actions';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export default async function ProductSearchPage() {
-  const { data: user } = await getUserProfileAction();
+  const { data: userProfile } = await getUserProfileAction();
+  const supabase = createSupabaseServerClient();
+  const { data: { session } } = await supabase.auth.getSession();
+
+  const user = session?.user;
 
   return (
     <PageWrapper>
@@ -21,14 +26,14 @@ export default async function ProductSearchPage() {
             </div>
             <h1 className="text-4xl font-bold font-headline text-foreground mt-4">Rechercher un Produit</h1>
             <p className="text-muted-foreground mt-2 text-lg">
-              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous. Renseignez votre numéro pour être contacté.
+              Vérifiez la disponibilité d'un produit dans les pharmacies proches de vous.
             </p>
           </header>
           
-          {user ? (
+          {user && userProfile ? (
             <>
-              <SearchForm />
-              <RecentSearches user={user} />
+              <SearchForm user={user} />
+              <RecentSearches user={userProfile} />
             </>
           ) : (
             <AuthForm />
@@ -39,5 +44,3 @@ export default async function ProductSearchPage() {
     </PageWrapper>
   );
 }
-
-    

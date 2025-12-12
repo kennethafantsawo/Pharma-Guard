@@ -14,14 +14,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormMessage, FormLabel } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, Paperclip, Send, X, Phone } from 'lucide-react';
+import { LoaderCircle, Paperclip, Send, X, Phone, User, LogOut } from 'lucide-react';
 import { createSearchAction } from './actions';
+import { createSupabaseClient } from '@/lib/supabase/client';
 
 const MAX_IMAGES = 3;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const SearchSchema = z.object({
-  clientPhone: z.string().min(8, "Le numéro de téléphone est requis et doit être valide."),
   productName: z.string().optional(),
   images: z.custom<FileList>().optional(),
 }).refine(data => data.productName || (data.images && data.images.length > 0), {
@@ -31,13 +31,23 @@ const SearchSchema = z.object({
 
 type SearchValues = z.infer<typeof SearchSchema>;
 
-export function SearchForm() {
+interface SearchFormProps {
+  user: { id: string; phone?: string | null };
+}
+
+export function SearchForm({ user }: SearchFormProps) {
   const [isPending, startTransition] = useTransition();
   const { toast } = useToast();
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const form = useForm<SearchValues>({
     resolver: zodResolver(SearchSchema),
   });
+
+  const handleSignOut = async () => {
+    const supabase = createSupabaseClient();
+    await supabase.auth.signOut();
+    window.location.reload();
+  }
   
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -97,7 +107,7 @@ export function SearchForm() {
   const onSubmit: SubmitHandler<SearchValues> = (data) => {
     startTransition(async () => {
       const formData = new FormData();
-      formData.append('clientPhone', data.clientPhone);
+      // The user phone is now handled on the server via their session
       if(data.productName) formData.append('productName', data.productName);
       if(data.images) {
         for(let i=0; i<data.images.length; i++) {
@@ -108,8 +118,8 @@ export function SearchForm() {
       const result = await createSearchAction(formData);
 
       if (result.success) {
-        toast({ title: 'Demande envoyée !', description: 'Les pharmacies à proximité seront notifiées. Vous serez contacté par téléphone.' });
-        form.reset({ productName: '', clientPhone: '' });
+        toast({ title: 'Demande envoyée !', description: 'Les pharmacies à proximité seront notifiées. Vous recevrez une réponse ici.' });
+        form.reset({ productName: '' });
         setImagePreviews([]);
         form.setValue('images', undefined);
       } else {
@@ -121,37 +131,25 @@ export function SearchForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Nouvelle demande</CardTitle>
-        <CardDescription>
-          Décrivez le produit, joignez une photo si possible, et laissez votre numéro pour être contacté par les pharmacies.
-        </CardDescription>
+        <div className="flex justify-between items-center">
+          <div>
+            <CardTitle>Nouvelle demande</CardTitle>
+            <CardDescription>
+              Décrivez un produit ou joignez sa photo. Les pharmacies vous répondront.
+            </CardDescription>
+          </div>
+          <Button onClick={handleSignOut} variant="outline" size="sm"><LogOut className="mr-2" />Déconnexion</Button>
+        </div>
+         <div className="pt-4">
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground p-3 bg-muted rounded-md border">
+              <User className="h-5 w-5 text-primary" />
+              <span>Connecté en tant que: <span className="font-semibold text-foreground">{user.phone}</span></span>
+            </div>
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-             <FormField
-              control={form.control}
-              name="clientPhone"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="clientPhone">Votre numéro de téléphone</FormLabel>
-                   <div className="relative">
-                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                     <FormControl>
-                        <Input
-                            id="clientPhone"
-                            type="tel"
-                            placeholder="Ex: 90123456"
-                            className="pl-10"
-                            {...field}
-                        />
-                     </FormControl>
-                   </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="productName"
