@@ -4,12 +4,6 @@
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { redirect } from 'next/navigation';
-import crypto from 'crypto';
-
-// Fonction pour générer un mot de passe aléatoire
-function generateRandomPassword(length = 8) {
-  return crypto.randomBytes(length).toString('hex').slice(0, length);
-}
 
 const signInSchema = z.object({
   pharmacyName: z.string().min(1, 'Le nom de la pharmacie est requis.'),
@@ -44,11 +38,10 @@ export async function signInWithPharmacyAction(formData: FormData) {
   const emailRedirectTo = `${appUrl}/auth/callback`;
 
   if (isNew) {
-    // 1. Créer un nouvel utilisateur (pharmacie)
-    const generatedPassword = generateRandomPassword(8); // Génère un mot de passe sécurisé
+    // 1. Créer un nouvel utilisateur (pharmacie) en utilisant le mot de passe fourni.
     const { data: { user }, error: signUpError } = await supabase.auth.signUp({
       email,
-      password: generatedPassword, // Utilise le mot de passe généré pour la création du compte
+      password: password, // Utilise le mot de passe du formulaire pour la création.
       options: {
         emailRedirectTo,
         data: {
@@ -72,6 +65,7 @@ export async function signInWithPharmacyAction(formData: FormData) {
     }
     
     // 2. Stocker le mot de passe saisi par l'utilisateur dans le profil
+    // C'est redondant si on vérifie le mot de passe via Supabase Auth, mais on le garde pour une vérification directe
     const { error: profileError } = await supabaseAdmin
         .from('profiles')
         .update({ password: password }) // Stocke le mot de passe du formulaire
@@ -88,47 +82,16 @@ export async function signInWithPharmacyAction(formData: FormData) {
   }
 
   // 3. Connexion de l'utilisateur
-  // D'abord, on récupère l'utilisateur par email pour vérifier son profil
-  const { data: userByEmail, error: userError } = await supabaseAdmin.from('users').select('id').eq('email', email).single();
-  if (userError || !userByEmail) {
-      return { error: 'Aucun compte trouvé pour cette pharmacie.' };
-  }
-
-  // Ensuite, on vérifie le mot de passe stocké dans le profil
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from('profiles')
-    .select('password')
-    .eq('id', userByEmail.id)
-    .single();
-
-  if (profileError || !profile) {
-    return { error: 'Profil de pharmacie introuvable.' };
-  }
-
-  if (profile.password !== password) {
-    return { error: 'Mot de passe incorrect.' };
-  }
-  
   // Si le mot de passe du profil correspond, on connecte l'utilisateur
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
-    password: password, // Il faut se connecter avec le mot de passe du profil
+    password: password,
   });
-
+  
   if (signInError) {
-      // Si la connexion échoue, cela peut être dû à un décalage de mot de passe.
-      // On met à jour le mot de passe Supabase Auth pour correspondre à celui du profil.
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userByEmail.id, { password: password });
-      if (updateError) {
-          console.error('Admin user update error:', updateError);
-          return { error: 'Impossible de synchroniser les informations de connexion. Veuillez réessayer.' };
-      }
-      // On retente la connexion après la mise à jour
-      const { error: retrySignInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (retrySignInError) {
-          console.error('Retry Sign In Error:', retrySignInError);
-          return { error: 'Échec de la connexion après synchronisation. Vérifiez le mot de passe.' };
-      }
+    // Si la connexion échoue, cela peut être dû à une erreur ou un mot de passe incorrect.
+    console.error('Sign In Error:', signInError);
+    return { error: 'Mot de passe incorrect ou erreur de connexion.' };
   }
 
 
