@@ -2,9 +2,7 @@
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
-import type { Database } from '@/lib/supabase/database.types';
 import { z } from 'zod';
-import { headers } from 'next/headers';
 
 const emailSchema = z.string().email('L\'adresse e-mail doit être valide.');
 
@@ -15,9 +13,11 @@ export async function signInWithEmailAction(email: string): Promise<{ success: b
     }
 
     const supabase = createSupabaseServerClient();
-    const origin = process.env.NEXT_PUBLIC_APP_URL;
+    // Utilise la variable d'environnement pour le développement, mais a une URL de secours pour la production.
+    const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://pharma-proget.vercel.app';
 
     if (!origin) {
+        // Cette erreur ne devrait plus se produire en production.
         return { success: false, error: "La configuration de l'application est incomplète. L'URL de l'application n'est pas définie." };
     }
 
@@ -37,12 +37,7 @@ export async function signInWithEmailAction(email: string): Promise<{ success: b
     return { success: true };
 }
 
-
-export async function getPharmacistProfile(): Promise<{
-    user: Database['public']['Tables']['profiles']['Row'] | null, 
-    profile: Database['public']['Tables']['profiles']['Row'] | null,
-    error?: string
-}> {
+export async function getPharmacistProfile() {
     const supabase = createSupabaseServerClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -50,47 +45,18 @@ export async function getPharmacistProfile(): Promise<{
         return { user: null, profile: null, error: "Utilisateur non trouvé." };
     }
 
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
     
-    // First time login for this user, create a profile
-    if (!profile) {
-        const { data: newProfile, error } = await supabase
-            .from('profiles')
-            .insert({
-                id: user.id,
-                username: user.email || 'Nouveau Pharmacien',
-                role: 'Pharmacien', // Assign 'Pharmacien' role
-            })
-            .select()
-            .single();
-
-        if (error) {
-            console.error("Error creating pharmacist profile:", error);
-            return { user: user as any, profile: null, error: "Erreur lors de la création du profil." };
-        }
-        return { user: user as any, profile: newProfile, error: undefined };
-    }
-
-    // If profile exists but role is not 'Pharmacien', update it
-    if (profile.role !== 'Pharmacien') {
-        const { data: updatedProfile, error } = await supabase
-            .from('profiles')
-            .update({ role: 'Pharmacien' })
-            .eq('id', user.id)
-            .select()
-            .single();
-        if (error) {
-             console.error("Error updating pharmacist role:", error);
-             return { user: user as any, profile, error: "Erreur de mise à jour du rôle." };
-        }
-        return { user: user as any, profile: updatedProfile, error: undefined };
+    if (profileError && profileError.code !== 'PGRST116') { // Ignore "no rows found"
+        console.error("Error fetching pharmacist profile:", profileError);
+        return { user: user, profile: null, error: "Erreur lors de la récupération du profil." };
     }
     
-    return { user: user as any, profile, error: undefined };
+    return { user, profile: profile || null, error: undefined };
 }
 
 export async function signOutAction() {

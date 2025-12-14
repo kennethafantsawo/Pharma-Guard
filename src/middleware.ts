@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
-import type { Database } from '@/lib/supabase/database.types'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -9,7 +8,7 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  const supabase = createServerClient<Database>(
+  const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -18,6 +17,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // If the cookie is updated, update the request cookie header in the response
           request.cookies.set({
             name,
             value,
@@ -35,6 +35,7 @@ export async function middleware(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
+          // If the cookie is removed, update the request cookie header in the response
           request.cookies.set({
             name,
             value: '',
@@ -55,6 +56,7 @@ export async function middleware(request: NextRequest) {
     }
   )
 
+  // refreshing the session before loading server components
   await supabase.auth.getSession()
 
   return response
