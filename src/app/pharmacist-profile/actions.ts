@@ -14,15 +14,15 @@ export async function getAllPharmacyNamesAction(): Promise<{
     return { success: false, error: 'Configuration serveur manquante.' };
   }
   try {
-    const { data: profiles, error } = await supabaseAdmin
-      .from('profiles')
-      .select('pharmacy_name')
-      .not('pharmacy_name', 'is', null);
+    // On récupère tous les noms de pharmacies distincts directement depuis la table des pharmacies.
+    const { data: pharmacies, error } = await supabaseAdmin
+      .from('pharmacies')
+      .select('nom');
 
     if (error) throw error;
 
-    // Use a Set to get unique names, then convert back to an array
-    const uniqueNames = [...new Set(profiles.map(p => p.pharmacy_name).filter(Boolean) as string[])];
+    // On s'assure que la liste ne contient que des noms uniques et on la trie.
+    const uniqueNames = [...new Set(pharmacies.map(p => p.nom).filter(Boolean) as string[])];
     
     return { success: true, data: uniqueNames.sort() };
   } catch (error) {
