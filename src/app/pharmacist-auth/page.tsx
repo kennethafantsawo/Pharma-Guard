@@ -19,17 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const formSchema = z.object({
-  pharmacyName: z.string().min(1, 'Veuillez sélectionner ou saisir une pharmacie.'),
-  password: z.string().min(6, 'Le mot de passe doit faire au moins 6 caractères.'),
-  newPharmacyName: z.string().optional(),
-}).refine(data => {
-    if (data.pharmacyName === 'other' && (!data.newPharmacyName || data.newPharmacyName.trim().length < 2)) {
-        return false;
-    }
-    return true;
-}, {
-    message: 'Veuillez saisir un nom de pharmacie valide (2 caractères min).',
-    path: ['newPharmacyName'],
+  pharmacyName: z.string().min(1, 'Veuillez sélectionner votre pharmacie.'),
+  password: z.string().min(1, 'Le mot de passe est requis.'),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -45,8 +36,6 @@ export default function PharmacistAuthPage() {
     resolver: zodResolver(formSchema),
   });
 
-  const selectedPharmacy = form.watch('pharmacyName');
-  const isNewPharmacy = selectedPharmacy === 'other';
 
   useEffect(() => {
     const fetchNames = async () => {
@@ -64,11 +53,9 @@ export default function PharmacistAuthPage() {
     setError(null);
     startTransition(async () => {
       const formData = new FormData();
-      const finalPharmacyName = isNewPharmacy ? data.newPharmacyName! : data.pharmacyName;
-      formData.append('pharmacyName', finalPharmacyName);
+      formData.append('pharmacyName', data.pharmacyName);
       formData.append('password', data.password);
-      formData.append('isNew', String(isNewPharmacy));
-
+      
       const result = await signInWithPharmacyAction(formData);
 
       if (result?.error) {
@@ -108,32 +95,12 @@ export default function PharmacistAuthPage() {
                             {pharmacyNames.map(name => (
                               <SelectItem key={name} value={name}>{name}</SelectItem>
                             ))}
-                            <SelectItem value="other">Autre (nouvelle pharmacie)</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-
-                  {isNewPharmacy && (
-                    <FormField
-                        control={form.control}
-                        name="newPharmacyName"
-                        render={({ field }) => (
-                            <FormItem className="animate-in fade-in duration-300">
-                                <FormLabel>Nom de votre nouvelle pharmacie</FormLabel>
-                                <FormControl>
-                                  <div className="relative">
-                                    <Hospital className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input placeholder="Ex: Pharmacie du Progrès" {...field} disabled={isPending} className="pl-10"/>
-                                  </div>
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                  )}
                   
                   <FormField
                     control={form.control}
@@ -166,7 +133,7 @@ export default function PharmacistAuthPage() {
                 </form>
               </Form>
               <p className="text-xs text-muted-foreground mt-4 text-center">
-                  Si votre pharmacie est nouvelle, choisissez "Autre" pour la créer.
+                  Si votre pharmacie n'est pas dans la liste, veuillez contacter l'administrateur.
               </p>
             </CardContent>
           </Card>

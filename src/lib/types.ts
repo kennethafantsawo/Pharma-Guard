@@ -38,3 +38,8 @@ export interface Profile {
   role: 'Client' | 'Pharmacien';
   password?: string | null;
 }
+
+export interface PharmacyWithProfile {
+    nom: string;
+    has_profile: boolean;
+}

@@ -10,19 +10,97 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from "@/hooks/use-toast"
-import { Lock, Settings, LogOut, LoaderCircle, Upload, Pencil, Trash2 } from 'lucide-react';
+import { Lock, Settings, LogOut, LoaderCircle, Upload, Pencil, Trash2, Users, KeyRound, Copy } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-import type { WeekSchedule, HealthPost } from '@/lib/types';
-import { updatePharmaciesAction } from './actions';
+import type { WeekSchedule, HealthPost, PharmacyWithProfile } from '@/lib/types';
+import { updatePharmaciesAction, generatePharmacyPasswordAction } from './actions';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const LoginSchema = z.object({
   password: z.string().min(1, 'Le mot de passe est requis.'),
 });
 type LoginValues = z.infer<typeof LoginSchema>;
 
+
+const PharmacistManager = ({ pharmacies, password }: { pharmacies: PharmacyWithProfile[], password: string }) => {
+    const { toast } = useToast();
+    const [isGenerating, setIsGenerating] = useState<string | null>(null);
+    const [newPassword, setNewPassword] = useState<{ name: string, pass: string } | null>(null);
+
+    const handleGeneratePassword = async (pharmacyName: string) => {
+        setIsGenerating(pharmacyName);
+        setNewPassword(null);
+        const result = await generatePharmacyPasswordAction(password, pharmacyName);
+        if (result.success && result.password) {
+            setNewPassword({ name: pharmacyName, pass: result.password });
+            toast({ title: "Succès !", description: `Mot de passe généré pour ${pharmacyName}.` });
+        } else {
+            toast({ title: "Erreur", description: result.error || "Impossible de générer le mot de passe.", variant: "destructive" });
+        }
+        setIsGenerating(null);
+    }
+    
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast({ title: "Copié !", description: "Le mot de passe a été copié dans le presse-papiers."});
+    }
+
+    return (
+        <div className="space-y-4">
+            <h3 className="font-semibold flex items-center gap-2"><Users />Gestion des Pharmaciens</h3>
+            <p className="text-sm text-muted-foreground">
+                Générez ou réinitialisez les mots de passe pour chaque pharmacie. Communiquez le mot de passe généré au pharmacien concerné.
+            </p>
+
+            {newPassword && (
+                 <Alert>
+                    <KeyRound className="h-4 w-4" />
+                    <AlertTitle>Nouveau mot de passe pour : {newPassword.name}</AlertTitle>
+                    <AlertDescription className="flex items-center justify-between">
+                       <span className="font-mono text-lg">{newPassword.pass}</span>
+                       <Button size="sm" variant="ghost" onClick={() => copyToClipboard(newPassword.pass)}>
+                            <Copy className="mr-2" /> Copier
+                       </Button>
+                    </AlertDescription>
+                </Alert>
+            )}
+
+            <div className="border rounded-md">
+                <div className="p-4 grid grid-cols-3 gap-4 font-semibold border-b">
+                    <div className="col-span-1">Pharmacie</div>
+                    <div className="col-span-2">Action</div>
+                </div>
+                {pharmacies.map(p => (
+                    <div key={p.nom} className="p-4 grid grid-cols-3 gap-4 items-center border-b last:border-b-0">
+                         <div className="col-span-1 flex flex-col">
+                            <span className="font-medium">{p.nom}</span>
+                            <span className="text-xs text-muted-foreground">{p.has_profile ? 'Compte actif' : 'Aucun compte'}</span>
+                         </div>
+                         <div className="col-span-2">
+                             <Button 
+                                size="sm" 
+                                variant={p.has_profile ? 'secondary' : 'default'}
+                                onClick={() => handleGeneratePassword(p.nom)}
+                                disabled={isGenerating === p.nom}
+                             >
+                                {isGenerating === p.nom 
+                                    ? <LoaderCircle className="animate-spin" /> 
+                                    : <KeyRound />
+                                }
+                                {p.has_profile ? 'Réinitialiser le mot de passe' : 'Créer et générer le mot de passe'}
+                             </Button>
+                         </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    )
+}
+
+
 // Admin Panel Component
-const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: string }) => {
+const AdminPanel = ({ onLogout, password, pharmacies }: { onLogout: () => void, password: string, pharmacies: PharmacyWithProfile[] }) => {
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
 
@@ -71,14 +149,15 @@ const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: st
           </CardDescription>
       </CardHeader>
       <CardContent>
-          <Tabs defaultValue="pharmacies" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="pharmacies">Pharmacies</TabsTrigger>
+          <Tabs defaultValue="pharmacies-data" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="pharmacies-data">Données Pharmacies</TabsTrigger>
+                <TabsTrigger value="pharmacists-mgmt">Gestion Pharmaciens</TabsTrigger>
                 <TabsTrigger value="health-posts">Fiches Santé</TabsTrigger>
             </TabsList>
-            <TabsContent value="pharmacies" className="pt-6">
+            <TabsContent value="pharmacies-data" className="pt-6">
                  <div className="space-y-4">
-                    <h3 className="font-semibold flex items-center gap-2"><Upload />Mise à jour des pharmacies</h3>
+                    <h3 className="font-semibold flex items-center gap-2"><Upload />Mise à jour des pharmacies de garde</h3>
                     <p className="text-sm text-muted-foreground">
                       Remplacez les données des pharmacies de garde en chargeant un nouveau fichier JSON.
                     </p>
@@ -88,6 +167,9 @@ const AdminPanel = ({ onLogout, password }: { onLogout: () => void, password: st
                       {isPending && <p className="text-sm text-muted-foreground flex items-center gap-2"><LoaderCircle className="animate-spin h-4 w-4" /> Mise à jour en cours...</p>}
                     </div>
                   </div>
+            </TabsContent>
+            <TabsContent value="pharmacists-mgmt" className="pt-6">
+                <PharmacistManager pharmacies={pharmacies} password={password} />
             </TabsContent>
             <TabsContent value="health-posts" className="pt-6">
                 <p className="text-sm text-center text-muted-foreground">La gestion des fiches santé sera bientôt disponible ici.</p>
@@ -133,7 +215,7 @@ const LoginForm = ({ onLogin }: { onLogin: (password: string) => void }) => {
     )
 };
 
-export function AdminPageClient() {
+export function AdminPageClient({ pharmacies }: { pharmacies: PharmacyWithProfile[] }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [password, setPassword] = useState('');
 
@@ -163,7 +245,7 @@ export function AdminPageClient() {
   return (
     <>
       {isLoggedIn ? (
-        <AdminPanel onLogout={handleLogout} password={password} />
+        <AdminPanel onLogout={handleLogout} password={password} pharmacies={pharmacies} />
       ) : (
         <LoginForm onLogin={handleLogin} />
       )}
