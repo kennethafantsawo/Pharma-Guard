@@ -13,19 +13,15 @@ export async function signInWithEmailAction(email: string): Promise<{ success: b
     }
 
     const supabase = createSupabaseServerClient();
-    // Utilise la variable d'environnement pour le développement, mais a une URL de secours pour la production.
+    // Use NEXT_PUBLIC_APP_URL for local dev, but fallback to the production URL.
+    // This makes sure it works in both environments without manual config on the hosting provider.
     const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://pharma-proget.vercel.app';
-
-    if (!origin) {
-        // Cette erreur ne devrait plus se produire en production.
-        return { success: false, error: "La configuration de l'application est incomplète. L'URL de l'application n'est pas définie." };
-    }
 
     const { error } = await supabase.auth.signInWithOtp({
         email: validatedEmail.data,
         options: {
-            // Le lien magique renverra l'utilisateur à la page de callback,
-            // qui le redirigera ensuite vers le tableau de bord.
+            // The magic link will send the user to the callback page,
+            // which will then redirect them to the dashboard.
             emailRedirectTo: `${origin}/auth/callback?next=/pharmacist-dashboard`,
         },
     });
