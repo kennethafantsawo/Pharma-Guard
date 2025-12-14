@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -35,12 +34,6 @@ export default function PharmacistDashboardPage() {
         router.push('/pharmacist-auth');
         return;
       }
-      
-      // NEW: Redirect to profile completion if pharmacy_name is missing
-      if (!profile.pharmacy_name) {
-        router.push('/pharmacist-profile');
-        return;
-      }
 
       setUser(user);
       setProfile(profile);
@@ -58,7 +51,6 @@ export default function PharmacistDashboardPage() {
 
   const handleSignOut = async () => {
     await signOutAction();
-    router.push('/');
   };
 
   if (loading) {
@@ -121,5 +113,3 @@ export default function PharmacistDashboardPage() {
     </PageWrapper>
   );
 }
-
-    

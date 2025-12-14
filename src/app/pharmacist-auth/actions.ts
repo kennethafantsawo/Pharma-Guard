@@ -1,36 +1,75 @@
-
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
-const emailSchema = z.string().email('L\'adresse e-mail doit être valide.');
+const signInSchema = z.object({
+  pharmacyName: z.string().min(1, 'Le nom de la pharmacie est requis.'),
+  password: z.string().min(6, 'Le mot de passe doit contenir au moins 6 caractères.'),
+  isNew: z.boolean(),
+});
 
-export async function signInWithEmailAction(email: string): Promise<{ success: boolean; error?: string }> {
-    const validatedEmail = emailSchema.safeParse(email);
-    if (!validatedEmail.success) {
-        return { success: false, error: 'Adresse e-mail invalide.' };
-    }
+export async function signInWithPharmacyAction(formData: FormData) {
+  const data = Object.fromEntries(formData.entries());
+  const validatedFields = signInSchema.safeParse({
+    ...data,
+    isNew: data.isNew === 'true',
+  });
 
-    const supabase = createSupabaseServerClient();
-    // Use NEXT_PUBLIC_APP_URL for local dev, but fallback to the production URL.
-    // This makes sure it works in both environments without manual config on the hosting provider.
-    const origin = process.env.NEXT_PUBLIC_APP_URL || 'https://pharma-proget.vercel.app';
+  if (!validatedFields.success) {
+    return {
+      error: 'Données invalides. Vérifiez les champs.',
+    };
+  }
 
-    const { error } = await supabase.auth.signInWithOtp({
-        email: validatedEmail.data,
-        options: {
-            // The magic link will send the user to the callback page,
-            // which will then redirect them to the dashboard.
-            emailRedirectTo: `${origin}/auth/callback?next=/pharmacist-dashboard`,
+  const { pharmacyName, password, isNew } = validatedFields.data;
+  const supabase = createSupabaseServerClient();
+
+  // Create a user-friendly email format
+  const email = `${pharmacyName.toLowerCase().replace(/\s+/g, '.')}@pharmaguard.app`;
+
+  if (isNew) {
+    // Sign up a new user (pharmacy)
+    const { data: { user }, error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          username: pharmacyName,
+          pharmacy_name: pharmacyName,
+          role: 'Pharmacien',
         },
+      },
     });
 
-    if (error) {
-        console.error("signInWithOtp (magic link) Error:", error);
-        return { success: false, error: "Impossible d'envoyer le lien de connexion. Assurez-vous que l'e-mail est correct." };
+    if (signUpError) {
+      console.error('Sign Up Error:', signUpError);
+      if (signUpError.message.includes('User already registered')) {
+        return { error: `Cette pharmacie existe déjà. Essayez de vous connecter.` };
+      }
+      return { error: `Impossible de créer le compte : ${signUpError.message}` };
     }
-    return { success: true };
+
+     if (!user) {
+        return { error: 'La création a échoué, aucun utilisateur retourné.' };
+    }
+
+  }
+
+  // Sign in the user (pharmacy)
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInError) {
+    console.error('Sign In Error:', signInError);
+    return { error: 'Échec de la connexion. Vérifiez le nom de la pharmacie et le mot de passe.' };
+  }
+
+  // On success, redirect to the dashboard
+  redirect('/pharmacist-dashboard');
 }
 
 export async function getPharmacistProfile() {
@@ -58,4 +97,5 @@ export async function getPharmacistProfile() {
 export async function signOutAction() {
     const supabase = createSupabaseServerClient();
     await supabase.auth.signOut();
+    redirect('/');
 }

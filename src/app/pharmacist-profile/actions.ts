@@ -3,6 +3,7 @@
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
+import { redirect } from 'next/navigation';
 
 export async function getAllPharmacyNamesAction(): Promise<{
   success: boolean;
@@ -13,14 +14,15 @@ export async function getAllPharmacyNamesAction(): Promise<{
     return { success: false, error: 'Configuration serveur manquante.' };
   }
   try {
-    const { data: pharmacies, error } = await supabaseAdmin
-      .from('pharmacies')
-      .select('nom');
+    const { data: profiles, error } = await supabaseAdmin
+      .from('profiles')
+      .select('pharmacy_name')
+      .not('pharmacy_name', 'is', null);
 
     if (error) throw error;
 
     // Use a Set to get unique names, then convert back to an array
-    const uniqueNames = [...new Set(pharmacies.map(p => p.nom))];
+    const uniqueNames = [...new Set(profiles.map(p => p.pharmacy_name).filter(Boolean) as string[])];
     
     return { success: true, data: uniqueNames.sort() };
   } catch (error) {
@@ -51,7 +53,5 @@ export async function updatePharmacistProfileAction(pharmacyName: string): Promi
         return { success: false, error: 'Impossible de mettre à jour le profil.' };
     }
 
-    return { success: true };
+    redirect('/pharmacist-dashboard');
 }
-
-    
