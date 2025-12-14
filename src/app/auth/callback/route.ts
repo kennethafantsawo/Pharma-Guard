@@ -12,17 +12,17 @@ export async function GET(request: Request) {
     const supabase = createSupabaseServerClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
+      // On success, redirect to the originally intended page (e.g., /pharmacist-dashboard)
       return NextResponse.redirect(`${origin}${next}`)
     }
-     // Log l'erreur détaillée côté serveur
+     // Log the detailed error on the server for debugging
     console.error('Auth callback session exchange error:', error.message);
   } else {
-    console.error('Auth callback error: No code received.');
+    console.error('Auth callback error: No code received in search params.');
   }
 
-
-  // En cas d'erreur (lien invalide, expiré, etc.), rediriger vers la page de connexion
-  // avec un message d'erreur clair pour l'utilisateur.
+  // On any error (invalid link, expired, no code, etc.), redirect to the login page
+  // with a clear error message for the user.
   const redirectUrl = new URL('/pharmacist-auth', origin);
   redirectUrl.searchParams.set('error', 'invalid_link');
   redirectUrl.searchParams.set('error_description', 'Le lien de connexion est invalide ou a expiré. Veuillez réessayer.');
