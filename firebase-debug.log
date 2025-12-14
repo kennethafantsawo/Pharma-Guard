@@ -874,3 +874,191 @@
 [error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
 [error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
 [debug] [2025-12-12T15:43:19.691Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:49:33.587Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:33.591Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.805Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.806Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.806Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.807Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.808Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.808Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.809Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.810Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.810Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.811Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.811Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.811Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.812Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.812Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.812Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.813Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.814Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.814Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.814Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.815Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.815Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.837Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.837Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.838Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.838Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.842Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.842Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.843Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.843Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.848Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.849Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.849Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.849Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.851Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.851Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.851Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.852Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.852Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.852Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.857Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.858Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.858Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.858Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.859Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.859Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.862Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.862Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.862Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.870Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.873Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.873Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:49:35.874Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.874Z] No OAuth tokens found
+[debug] [2025-12-14T08:49:35.874Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:49:38.048Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:49:40.188Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:05.497Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:05.508Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:12.743Z] Running auto auth
+[debug] [2025-12-14T08:51:12.753Z] Running auto auth
+[debug] [2025-12-14T08:51:12.921Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.929Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.935Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.943Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.944Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.949Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:12.950Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.041Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.048Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.054Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.063Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.195Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.196Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.205Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.205Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.223Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.223Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.235Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.235Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.245Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.245Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.256Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.257Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.266Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.271Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.282Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com [none]
+[debug] [2025-12-14T08:51:13.287Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.433Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.434Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.437Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.438Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.439Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.439Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.443Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.454Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.456Z] No OAuth tokens found
+[debug] [2025-12-14T08:51:13.460Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.461Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.473Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.473Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.497Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.498Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.514Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.514Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.525Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.526Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.538Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.538Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.546Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.547Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.550Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com [none]
+[debug] [2025-12-14T08:51:13.552Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:13.557Z] >>> [apiv2][query] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com [none]
+[debug] [2025-12-14T08:51:13.557Z] >>> [apiv2][(partial)header] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com x-goog-quota-user=projects/pharmaguard-vduzd
+[debug] [2025-12-14T08:51:14.335Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com 403
+[debug] [2025-12-14T08:51:14.336Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com [omitted]
+[debug] [2025-12-14T08:51:14.457Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com 200
+[debug] [2025-12-14T08:51:14.458Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.476Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-12-14T08:51:14.476Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.505Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com 200
+[debug] [2025-12-14T08:51:14.505Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.557Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com 200
+[debug] [2025-12-14T08:51:14.558Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.597Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com 200
+[debug] [2025-12-14T08:51:14.597Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/fcm.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.626Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com 200
+[debug] [2025-12-14T08:51:14.627Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.636Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com 200
+[debug] [2025-12-14T08:51:14.636Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.658Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com 200
+[debug] [2025-12-14T08:51:14.658Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/storage.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.679Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-12-14T08:51:14.679Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.681Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com 200
+[debug] [2025-12-14T08:51:14.681Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firestore.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.692Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com 200
+[debug] [2025-12-14T08:51:14.692Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseapphosting.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.694Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com 403
+[debug] [2025-12-14T08:51:14.695Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseio.com [omitted]
+[debug] [2025-12-14T08:51:14.698Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com 200
+[debug] [2025-12-14T08:51:14.698Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebasedataconnect.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.702Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com 200
+[debug] [2025-12-14T08:51:14.702Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.710Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.710Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.714Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.714Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
+[debug] [2025-12-14T08:51:14.726Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com 200
+[debug] [2025-12-14T08:51:14.727Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/identitytoolkit.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.738Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com 200
+[debug] [2025-12-14T08:51:14.738Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/firebaseremoteconfig.googleapis.com [omitted]
+[debug] [2025-12-14T08:51:14.751Z] <<< [apiv2][status] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com 200
+[debug] [2025-12-14T08:51:14.751Z] <<< [apiv2][body] GET https://serviceusage.googleapis.com/v1/projects/pharmaguard-vduzd/services/cloudfunctions.googleapis.com [omitted]
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.791Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.791Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.795Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.795Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.811Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.811Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
+[error] Failed to fetch Firebase Project from Studio Workspace because WORKSPACE_SLUG environment variable is empty
+[debug] [2025-12-14T08:51:14.826Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2025-12-14T08:51:14.826Z] > authorizing via signed-in user (kennethafantsawo@gmail.com)
