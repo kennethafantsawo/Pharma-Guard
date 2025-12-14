@@ -14,12 +14,17 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+     // Log l'erreur détaillée côté serveur
     console.error('Auth callback session exchange error:', error.message);
   } else {
     console.error('Auth callback error: No code received.');
   }
 
 
-  // return the user to an error page with instructions
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+  // En cas d'erreur (lien invalide, expiré, etc.), rediriger vers la page de connexion
+  // avec un message d'erreur clair pour l'utilisateur.
+  const redirectUrl = new URL('/pharmacist-auth', origin);
+  redirectUrl.searchParams.set('error', 'invalid_link');
+  redirectUrl.searchParams.set('error_description', 'Le lien de connexion est invalide ou a expiré. Veuillez réessayer.');
+  return NextResponse.redirect(redirectUrl);
 }
