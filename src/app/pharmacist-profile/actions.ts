@@ -1,8 +1,7 @@
 
 'use server';
 
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
 export async function getAllPharmacyNamesAction(): Promise<{
@@ -10,6 +9,7 @@ export async function getAllPharmacyNamesAction(): Promise<{
   data?: string[];
   error?: string;
 }> {
+  const supabaseAdmin = createSupabaseAdminClient();
   if (!supabaseAdmin) {
     return { success: false, error: 'Configuration serveur manquante.' };
   }

@@ -1,7 +1,7 @@
 
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import type { WeekSchedule } from '@/lib/types';
 
@@ -9,6 +9,8 @@ export async function updatePharmaciesAction(password: string, newSchedules: Wee
   if (password !== process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
     return { success: false, message: 'Mot de passe incorrect.' };
   }
+  
+  const supabaseAdmin = createSupabaseAdminClient();
 
   if (!supabaseAdmin) {
     return { 

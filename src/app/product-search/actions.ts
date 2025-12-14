@@ -1,11 +1,11 @@
+
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { createSupabaseAdminClient, createSupabaseServerClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 import { processDemand } from '@/ai/flows/process-demand';
 import { revalidatePath } from 'next/cache';
 import type { Database } from '@/lib/supabase/database.types';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
 
 export async function getUserProfileAction(): Promise<{data: Database['public']['Tables']['profiles']['Row'] | null}> {
     const supabase = createSupabaseServerClient();
@@ -33,6 +33,7 @@ const CreateSearchSchema = z.object({
 });
 
 export async function createSearchAction(formData: FormData): Promise<{success: boolean, error?: string}> {
+    const supabaseAdmin = createSupabaseAdminClient();
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.' };
     }
@@ -106,6 +107,7 @@ export async function createSearchAction(formData: FormData): Promise<{success: 
 }
 
 export async function getSearchesByClientAction(userId: string) {
+    const supabaseAdmin = createSupabaseAdminClient();
     if (!supabaseAdmin) {
         return { success: false, error: 'La configuration du serveur est manquante.', data: null };
     }

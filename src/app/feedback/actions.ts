@@ -1,7 +1,7 @@
 
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { createSupabaseAdminClient } from '@/lib/supabase/server';
 import { z } from 'zod';
 
 const FeedbackSchema = z.object({
@@ -12,6 +12,7 @@ const FeedbackSchema = z.object({
 export async function submitFeedbackAction(
   data: z.infer<typeof FeedbackSchema>
 ): Promise<{ success: boolean; error?: string }> {
+  const supabaseAdmin = createSupabaseAdminClient();
   if (!supabaseAdmin) {
     return { success: false, error: "Configuration Supabase (côté serveur) manquante. Veuillez ajouter NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY à votre fichier .env." };
   }
