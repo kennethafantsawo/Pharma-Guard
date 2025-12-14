@@ -3,6 +3,7 @@
 
 import { createSupabaseServerClient, createSupabaseAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 export async function getAllPharmacyNamesAction(): Promise<{
   success: boolean;
@@ -32,26 +33,60 @@ export async function getAllPharmacyNamesAction(): Promise<{
   }
 }
 
-export async function updatePharmacistProfileAction(pharmacyName: string): Promise<{
+export async function updatePharmacistProfileAction(formData: FormData): Promise<{
     success: boolean;
     error?: string;
 }> {
     const supabase = createSupabaseServerClient();
+    const supabaseAdmin = createSupabaseAdminClient();
 
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-        return { success: false, error: 'Utilisateur non authentifié.' };
+    if (!user || !supabaseAdmin) {
+        return { success: false, error: 'Utilisateur non authentifié ou configuration admin manquante.' };
     }
 
-    const { error } = await supabase
+    const newPassword = formData.get('newPassword') as string;
+    const pharmacyName = formData.get('pharmacyName') as string;
+
+    const updates: { pharmacy_name?: string; password?: string } = {};
+
+    if (pharmacyName) {
+        updates.pharmacy_name = pharmacyName;
+    }
+    if (newPassword) {
+        updates.password = newPassword;
+    }
+
+    if (Object.keys(updates).length === 0) {
+        return { success: true }; // No changes to make
+    }
+
+    // Mettre à jour le profil dans la table 'profiles'
+    const { error: profileError } = await supabaseAdmin
         .from('profiles')
-        .update({ pharmacy_name: pharmacyName })
+        .update(updates)
         .eq('id', user.id);
     
-    if (error) {
-        console.error('Error updating profile:', error);
+    if (profileError) {
+        console.error('Error updating profile:', profileError);
         return { success: false, error: 'Impossible de mettre à jour le profil.' };
     }
 
-    redirect('/pharmacist-dashboard');
+    // Si le mot de passe a été changé, mettre aussi à jour le mot de passe de l'utilisateur dans Supabase Auth
+    if (newPassword) {
+        const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(user.id, {
+            password: newPassword,
+        });
+
+        if (authError) {
+            console.error('Error updating auth user password:', authError);
+            // On pourrait envisager une logique pour annuler la mise à jour du profil ici
+            return { success: false, error: "Impossible de mettre à jour le mot de passe d'authentification." };
+        }
+    }
+    
+    revalidatePath('/pharmacist-dashboard');
+    revalidatePath('/pharmacist-profile');
+    return { success: true };
 }
+

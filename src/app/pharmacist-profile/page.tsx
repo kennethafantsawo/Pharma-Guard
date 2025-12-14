@@ -16,25 +16,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { getPharmacistProfile } from '@/app/pharmacist-auth/actions';
 import { getAllPharmacyNamesAction, updatePharmacistProfileAction } from './actions';
-import { LoaderCircle, Hospital } from 'lucide-react';
+import { LoaderCircle, Hospital, KeyRound } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { Profile } from '@/lib/types';
 
 const ProfileSchema = z.object({
   pharmacyName: z.string().min(1, 'Veuillez sélectionner une pharmacie.'),
-  newPharmacyName: z.string().optional(),
-}).refine(data => {
-    if (data.pharmacyName === 'other' && (!data.newPharmacyName || data.newPharmacyName.trim().length < 2)) {
-        return false;
-    }
-    return true;
-}, {
-    message: 'Veuillez saisir un nom de pharmacie valide (2 caractères min).',
-    path: ['newPharmacyName'],
+  newPassword: z.string().optional(),
 });
 
 type ProfileValues = z.infer<typeof ProfileSchema>;
 
-export default function CompleteProfilePage() {
+export default function ProfilePage() {
+    const [profile, setProfile] = useState<Profile | null>(null);
     const [pharmacyNames, setPharmacyNames] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
     const [isPending, startTransition] = useTransition();
@@ -44,20 +38,19 @@ export default function CompleteProfilePage() {
     const form = useForm<ProfileValues>({
         resolver: zodResolver(ProfileSchema),
     });
-    const selectedPharmacy = form.watch('pharmacyName');
 
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const profileResult = await getPharmacistProfile();
-            if (!profileResult.user || !profileResult.profile) {
+            const { user, profile: currentProfile } = await getPharmacistProfile();
+            
+            if (!user || !currentProfile) {
                 router.push('/pharmacist-auth');
                 return;
             }
-             if (profileResult.profile.pharmacy_name) {
-                router.push('/pharmacist-dashboard');
-                return;
-            }
+            
+            setProfile(currentProfile);
+            form.setValue('pharmacyName', currentProfile.pharmacy_name || '');
 
             const namesResult = await getAllPharmacyNamesAction();
             if (namesResult.success && namesResult.data) {
@@ -66,16 +59,21 @@ export default function CompleteProfilePage() {
             setLoading(false);
         };
         fetchData();
-    }, [router]);
+    }, [router, form]);
 
     const onSubmit: SubmitHandler<ProfileValues> = (data) => {
         startTransition(async () => {
-            const finalPharmacyName = data.pharmacyName === 'other' ? data.newPharmacyName! : data.pharmacyName;
-            const result = await updatePharmacistProfileAction(finalPharmacyName);
+            const formData = new FormData();
+            formData.append('pharmacyName', data.pharmacyName);
+            if (data.newPassword) {
+              formData.append('newPassword', data.newPassword);
+            }
+
+            const result = await updatePharmacistProfileAction(formData);
 
             if (result.success) {
-                toast({ title: 'Profil mis à jour !', description: 'Vous allez être redirigé vers votre tableau de bord.' });
-                router.push('/pharmacist-dashboard');
+                toast({ title: 'Profil mis à jour !', description: 'Vos informations ont été enregistrées.' });
+                form.reset({ ...form.getValues(), newPassword: '' }); // Reset only password field
             } else {
                 toast({ title: 'Erreur', description: result.error || 'Impossible de mettre à jour le profil.', variant: 'destructive' });
             }
@@ -87,12 +85,17 @@ export default function CompleteProfilePage() {
             <PageWrapper>
                 <div className="container mx-auto px-4 md:px-6 py-8">
                     <div className="max-w-xl mx-auto">
-                        <Skeleton className="h-48 w-full" />
+                        <Skeleton className="h-64 w-full" />
                     </div>
                 </div>
             </PageWrapper>
         )
     }
+    
+     if (!profile) {
+        return <PageWrapper><div className="container p-8">Chargement du profil...</div></PageWrapper>;
+    }
+
 
     return (
         <PageWrapper>
@@ -101,10 +104,10 @@ export default function CompleteProfilePage() {
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 font-headline text-2xl">
-                                <Hospital /> Finaliser votre profil
+                                <Hospital /> Gérer votre profil
                             </CardTitle>
                             <CardDescription>
-                                Veuillez sélectionner votre pharmacie pour continuer. Si elle n'est pas dans la liste, choisissez "Autre" pour l'ajouter.
+                                Mettez à jour le nom de votre pharmacie ou votre mot de passe.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -126,30 +129,32 @@ export default function CompleteProfilePage() {
                                                         {pharmacyNames.map(name => (
                                                             <SelectItem key={name} value={name}>{name}</SelectItem>
                                                         ))}
-                                                        <SelectItem value="other">Autre (préciser)</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-                                    {selectedPharmacy === 'other' && (
-                                        <FormField
-                                            control={form.control}
-                                            name="newPharmacyName"
-                                            render={({ field }) => (
-                                                <FormItem className="animate-in fade-in duration-300">
-                                                    <FormLabel>Nom de votre nouvelle pharmacie</FormLabel>
-                                                    <FormControl>
-                                                        <Input placeholder="Ex: Pharmacie du Progrès" {...field} disabled={isPending}/>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    )}
+                                    
+                                    <FormField
+                                        control={form.control}
+                                        name="newPassword"
+                                        render={({ field }) => (
+                                          <FormItem>
+                                            <FormLabel>Nouveau mot de passe (optionnel)</FormLabel>
+                                            <FormControl>
+                                               <div className="relative">
+                                                 <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                 <Input type="password" placeholder="Laissez vide pour ne pas changer" className="pl-10" {...field} />
+                                               </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                          </FormItem>
+                                        )}
+                                      />
+
                                     <Button type="submit" disabled={isPending} className="w-full">
-                                        {isPending ? <LoaderCircle className="animate-spin" /> : 'Enregistrer et Continuer'}
+                                        {isPending ? <LoaderCircle className="animate-spin" /> : 'Enregistrer les modifications'}
                                     </Button>
                                 </form>
                             </Form>

@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn, LayoutDashboard, FileText } from 'lucide-react';
+import { Menu, BookOpen, Pill, Star, Settings, Search, LogIn, LayoutDashboard, FileText, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from './theme-toggle';
 
@@ -81,11 +81,18 @@ export function Header() {
           <nav className="hidden items-center gap-1 md:flex">
             <NavLinks />
           </nav>
-           <Button asChild variant="outline" className="hidden md:flex">
-              <Link href="/pharmacist-dashboard">
-                <LayoutDashboard className="mr-2 h-4 w-4" /> Espace Pharmacien
-              </Link>
-            </Button>
+           <div className="hidden md:flex items-center gap-1">
+             <Button asChild variant="outline">
+                <Link href="/pharmacist-dashboard">
+                  <LayoutDashboard className="mr-2 h-4 w-4" /> Espace Pharmacien
+                </Link>
+              </Button>
+               <Button asChild variant="ghost" size="icon" aria-label="Profil Pharmacien">
+                <Link href="/pharmacist-profile">
+                  <User />
+                </Link>
+              </Button>
+            </div>
           <ThemeToggle />
           <div className="md:hidden">
             <Sheet>
@@ -99,10 +106,15 @@ export function Header() {
                 <SheetTitle className="sr-only">Navigation Menu</SheetTitle>
                 <div className="flex flex-col gap-4 py-6">
                   <NavLinks inSheet />
-                   <div className="border-t pt-4">
+                   <div className="border-t pt-4 space-y-2">
                      <Button asChild variant="outline" className="w-full justify-center">
                         <Link href="/pharmacist-dashboard">
                             <LayoutDashboard className="mr-2 h-4 w-4" /> Espace Pharmacien
+                        </Link>
+                     </Button>
+                     <Button asChild variant="outline" className="w-full justify-center">
+                        <Link href="/pharmacist-profile">
+                            <User className="mr-2 h-4 w-4" /> Gérer mon profil
                         </Link>
                      </Button>
                    </div>

@@ -1,4 +1,5 @@
 
+
 export interface Pharmacy {
   nom: string;
   localisation: string;
@@ -27,4 +28,13 @@ export interface HealthPostComment {
   post_id: number;
   content: string;
   created_at: string;
+}
+
+export interface Profile {
+  id: string;
+  username: string;
+  pharmacy_name: string | null;
+  phone: string | null;
+  role: 'Client' | 'Pharmacien';
+  password?: string | null;
 }
