@@ -1,3 +1,4 @@
+
 'use server';
 
 import { createSupabaseServerClient } from '@/lib/supabase/server';
@@ -28,6 +29,9 @@ export async function signInWithPharmacyAction(formData: FormData) {
 
   // Create a user-friendly email format
   const email = `${pharmacyName.toLowerCase().replace(/\s+/g, '.')}@pharmaguard.app`;
+  
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://pharma-proget.vercel.app';
+  const emailRedirectTo = `${appUrl}/auth/callback`;
 
   if (isNew) {
     // Sign up a new user (pharmacy)
@@ -35,6 +39,7 @@ export async function signInWithPharmacyAction(formData: FormData) {
       email,
       password,
       options: {
+        emailRedirectTo,
         data: {
           username: pharmacyName,
           pharmacy_name: pharmacyName,

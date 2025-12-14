@@ -1,63 +1,33 @@
 
 import { NextResponse, type NextRequest } from 'next/server';
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createSupabaseMiddlewareClient } from '@/lib/supabase/server';
 
 export async function middleware(request: NextRequest) {
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
+  
+  // This `try/catch` block is necessary for the middleware to function correctly.
+  // It allows the request to be handled even if there's an error creating the Supabase client.
+  try {
+    const { supabase, response } = {
+        supabase: createSupabaseMiddlewareClient(request),
+        response: NextResponse.next({ request }),
+    };
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value;
-        },
-        set(name: string, value: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
-        },
-        remove(name: string, options: CookieOptions) {
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          });
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
-        },
+    // Refresh session if expired - required for Server Components
+    // https://supabase.com/docs/guides/auth/auth-helpers/nextjs#managing-session-with-middleware
+    await supabase.auth.getSession();
+
+    return response;
+
+  } catch (e) {
+    // If you are here, a Supabase client could not be created!
+    // This is likely because you have not set up environment variables.
+    // Check out http://pris.ly/d/supabase- αφού
+    return NextResponse.next({
+      request: {
+        headers: request.headers,
       },
-    }
-  );
-
-  await supabase.auth.getSession();
-
-  return response;
+    });
+  }
 }
 
 export const config = {

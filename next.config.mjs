@@ -1,4 +1,5 @@
-require('dotenv').config({ path: require('path').resolve(process.cwd(), '.env') });
+
+import 'dotenv/config';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -30,17 +31,13 @@ const nextConfig = {
       },
     ],
   },
-  env: {
-    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  }
 };
 
 // Add Supabase storage hostname if the URL is set
 if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
   try {
     const supabaseHostname = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).hostname;
-    if (supabaseHostname && supabaseHostname !== 'pooariitfzfacjafwkkp.supabase.co') {
+    if (supabaseHostname && !nextConfig.images.remotePatterns.some(p => p.hostname === supabaseHostname)) {
         nextConfig.images.remotePatterns.push({
           protocol: 'https',
           hostname: supabaseHostname,
@@ -53,4 +50,4 @@ if (process.env.NEXT_PUBLIC_SUPABASE_URL) {
   }
 }
 
-module.exports = nextConfig;
+export default nextConfig;
